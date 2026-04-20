@@ -1,6 +1,4 @@
-# [Disha Gujar] : Root-level .gitignore for HireConnect Backend monorepo.
-# Excludes compiled output, IDE project files, OS artifacts, secrets, and log files
-# to keep the repository clean and avoid committing sensitive or generated content.
+# [Disha Gujar] : Added .gitignore file
 
 # ─── Maven Build Output ─────────────────────────────────────────────────────
 **/target/
