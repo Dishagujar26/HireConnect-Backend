@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the Application Service — enables Feign Clients for inter-service communication.
-// Responsible for processing candidate job applications, tracking application lifecycle statuses
-// (APPLIED, SHORTLISTED, REJECTED, HIRED), and publishing Kafka events to trigger notifications.
+// [Disha Gujar] : Responsible for candidate job applications, status tracking, and Kafka event publishing.
 package com.hireconnect.applicationservice;
 
 import org.springframework.boot.SpringApplication;

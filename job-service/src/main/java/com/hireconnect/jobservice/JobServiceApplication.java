@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the Job Service — responsible for the complete job posting lifecycle.
-// Provides CRUD operations for jobs, advanced search/filter by keyword, location, job type, experience
-// level and salary range, featured job marking, and internal ownership/existence checks for other services.
+// [Disha Gujar] : Provides CRUD operations, advanced search/filter, and recruiter ownership checks.
 package com.hireconnect.jobservice;
 
 import org.springframework.boot.SpringApplication;

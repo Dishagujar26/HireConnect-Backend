@@ -1,6 +1,5 @@
-// [Disha Gujar] : Entry point for the Auth Service — bootstraps Spring Boot application with JPA repositories,
-// Feign Clients, and entity scanning. Handles user registration, login, JWT issuance, refresh tokens,
-// forgot/reset password via OTP, and Google OAuth2 social login flow.
+// [Disha Gujar] : Entry point for the Auth Service — bootstraps Spring Boot with JPA and Feign Clients.
+// [Disha Gujar] : Handles registration, login, JWT issuance, and Google OAuth2 flow.
 package com.hireconnect.auth;
 
 import org.springframework.boot.SpringApplication;

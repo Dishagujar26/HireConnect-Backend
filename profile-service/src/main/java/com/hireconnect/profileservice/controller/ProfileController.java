@@ -37,6 +37,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
+    // [Disha Gujar] : Endpoint to create a new user profile (Candidate or Recruiter).
     @PostMapping
     public ResponseEntity<ProfileResponseDto> createProfile(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -54,6 +55,7 @@ public class ProfileController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // [Disha Gujar] : Retrieves the authenticated user's profile details.
     @GetMapping("/me")
     public ResponseEntity<ProfileResponseDto> getMyProfile(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -66,6 +68,7 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
+    // [Disha Gujar] : Updates the authenticated user's profile details.
     @PutMapping("/me")
     public ResponseEntity<ProfileResponseDto> updateMyProfile(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -94,6 +97,7 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
+    // [Disha Gujar] : Uploads a PDF resume for the authenticated candidate.
     @PostMapping("/resume/upload")
     public ResponseEntity<String> uploadResume(
             @RequestParam("file") MultipartFile file,
@@ -103,6 +107,7 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.uploadResume(user, file));
     }
 
+    // [Disha Gujar] : Allows a candidate to download their own uploaded resume.
     @GetMapping("/resume/my")
     public ResponseEntity<byte[]> downloadMyResume(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -118,6 +123,7 @@ public class ProfileController {
                 .body(resume.getFileData());
     }
 
+    // [Disha Gujar] : Allows a recruiter to download a candidate's resume for a job application they own.
     @GetMapping("/resume/recruiter/{candidateId}/{jobId}")
     public ResponseEntity<byte[]> downloadResumeForRecruiter(
             @PathVariable Long candidateId,

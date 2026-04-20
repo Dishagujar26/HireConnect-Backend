@@ -31,6 +31,8 @@ import com.hireconnect.applicationservice.service.ApplicationService;
 
 import lombok.RequiredArgsConstructor;
 
+// [Disha Gujar] : Service implementation for application management business logic.
+// Handles candidate job applications, duplicate checks, status updates, and recruiter notifications.
 @Service
 @RequiredArgsConstructor
 public class ApplicationServiceImpl implements ApplicationService {
@@ -42,6 +44,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final NotificationEventProducer notificationEventProducer;
     private final ProfileServiceClient profileServiceClient;
 
+    // [Disha Gujar] : Processes a job application submission with validation and duplicate prevention.
     @Override
     @Transactional
     public ApplicationResponseDto applyToJob(AuthenticatedUser user, ApplicationRequestDto requestDto) {
@@ -101,6 +104,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
     }
 
+    // [Disha Gujar] : Retrieves all job applications submitted by the authenticated candidate.
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponseDto> getMyApplications(AuthenticatedUser user) {
@@ -135,6 +139,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         return mapToResponse(application);
     }
 
+    // [Disha Gujar] : Retrieves all applications for jobs owned by the authenticated recruiter.
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponseDto> getApplicationsForRecruiter(AuthenticatedUser user) {
@@ -162,6 +167,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applications;
     }
 
+    // [Disha Gujar] : Updates the status of a job application (e.g., Shortlisted, Rejected).
     @Override
     @Transactional
     public ApplicationResponseDto updateApplicationStatus(
@@ -337,6 +343,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         return applications;
     }
 
+    // [Disha Gujar] : Fetches applications for a specific job with candidate profile previews.
     @Override
     @Transactional(readOnly = true)
     public List<RecruiterJobApplicationResponseDto> getApplicationsForRecruiterJob(

@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the API Gateway — the single entry point for all client requests.
-// Validates JWT tokens, enforces role-based access control, and routes traffic to downstream
-// microservices (auth, job, application, interview, payment, profile, notification) via Spring Cloud Gateway.
+// [Disha Gujar] : Validates JWT tokens, enforces RBAC, and routes traffic to downstream microservices.
 package com.hireconnect.apigateway;
 
 import org.springframework.boot.SpringApplication;

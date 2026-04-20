@@ -32,6 +32,7 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
 
+    // [Disha Gujar] : Allows a candidate to apply for a job posting.
     @PostMapping
     public ResponseEntity<ApplicationResponseDto> applyToJob(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -43,6 +44,7 @@ public class ApplicationController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // [Disha Gujar] : Retrieves all job applications submitted by the currently logged-in candidate.
     @GetMapping("/me")
     public ResponseEntity<List<ApplicationResponseDto>> getMyApplications(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -62,6 +64,7 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getMyApplicationById(user, applicationId));
     }
 
+    // [Disha Gujar] : Retrieves all job applications across all jobs for the currently logged-in recruiter.
     @GetMapping("/recruiter")
     public ResponseEntity<List<ApplicationResponseDto>> getApplicationsForRecruiter(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -71,6 +74,7 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getApplicationsForRecruiter(user));
     }
 
+    // [Disha Gujar] : Updates the status of a specific job application by a recruiter.
     @PutMapping("/{applicationId}/status")
     public ResponseEntity<ApplicationResponseDto> updateApplicationStatus(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -100,6 +104,7 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getApplicationsByJobId(user, jobId));
     }
     
+    // [Disha Gujar] : Fetches applications for a specific job with detailed candidate profile previews.
     @GetMapping("/recruiter/job/{jobId}")
     public ResponseEntity<List<RecruiterJobApplicationResponseDto>> getApplicationsForRecruiterJob(
             @AuthenticationPrincipal AuthenticatedUser user,

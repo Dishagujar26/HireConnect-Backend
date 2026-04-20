@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the Notification Service — event-driven email notification system.
-// Consumes Kafka topics published by other microservices (auth, application, interview) and dispatches
-// transactional emails via JavaMailSender for registration, application status changes, and interview alerts.
+// [Disha Gujar] : Consumes Kafka topics and dispatches transactional emails via JavaMailSender.
 package com.hireconnect.notificationservice;
 
 import org.springframework.boot.SpringApplication;

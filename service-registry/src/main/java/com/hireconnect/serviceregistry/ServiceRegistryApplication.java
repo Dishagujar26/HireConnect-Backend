@@ -1,6 +1,6 @@
 // [Disha Gujar] : Entry point for the Service Registry — Netflix Eureka server for microservice discovery.
-// All HireConnect services register with this Eureka server on startup, enabling load-balanced
-// Feign client calls and dynamic routing through the API Gateway without hard-coded service URLs.
+// [Disha Gujar] : All HireConnect services register with this Eureka server on startup.
+// [Disha Gujar] : Enables load-balanced Feign calls and dynamic routing via API Gateway.
 package com.hireconnect.serviceregistry;
 
 import org.springframework.boot.SpringApplication;

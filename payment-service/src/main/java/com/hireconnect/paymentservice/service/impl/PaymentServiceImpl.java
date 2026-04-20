@@ -28,6 +28,8 @@ import com.razorpay.Utils;
 
 import lombok.RequiredArgsConstructor;
 
+// [Disha Gujar] : Service implementation for payment processing via Razorpay.
+// Handles order creation, signature verification, and Razorpay webhook events.
 @Service
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
@@ -37,6 +39,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final RazorpayProperties razorpayProperties;
 
+    // [Disha Gujar] : Creates a Razorpay payment order and stores it in the database with status CREATED.
     @Override
     @Transactional
     public PaymentOrderResponseDto createOrder(AuthenticatedUser user, CreatePaymentOrderRequestDto request) {
@@ -87,6 +90,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    // [Disha Gujar] : Verifies the Razorpay payment signature and updates order status to SUCCESS or FAILED.
     @Override
     @Transactional
     public PaymentResponseDto verifyPayment(AuthenticatedUser user, VerifyPaymentRequestDto request) {
@@ -131,6 +135,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    // [Disha Gujar] : Retrieves all payment transaction history for the authenticated user.
     @Override
     public List<PaymentResponseDto> getMyPayments(AuthenticatedUser user) {
         logger.info("Fetching payment history for userId={}", user.userId());
@@ -140,6 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .toList();
     }
 
+    // [Disha Gujar] : Processes server-to-server webhook events from Razorpay for asynchronous payment confirmation.
     @Override
     @Transactional
     public void handleWebhook(String payload, String signature) {

@@ -25,6 +25,7 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    // [Disha Gujar] : Retrieves a paginated list of notifications for the authenticated user.
     @GetMapping
     public ResponseEntity<Page<NotificationResponseDto>> getMyNotifications(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -35,6 +36,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getMyNotifications(user, page, size));
     }
 
+    // [Disha Gujar] : Returns the count of unread notifications for the currently logged-in user.
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -43,6 +45,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getUnreadCount(user));
     }
 
+    // [Disha Gujar] : Marks a specific notification as read.
     @PutMapping("/{notificationId}/read")
     public ResponseEntity<NotificationResponseDto> markAsRead(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -52,6 +55,7 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.markAsRead(user, notificationId));
     }
 
+    // [Disha Gujar] : Deletes a specific notification from the user's history.
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<String> deleteNotification(
             @AuthenticationPrincipal AuthenticatedUser user,

@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the Interview Service — enables Feign Clients for cross-service data access.
-// Manages the full interview lifecycle: scheduling interviews by recruiters, updating interview details,
-// cancellation workflows, and providing interview views for both recruiter and candidate roles.
+// [Disha Gujar] : Manages the full interview lifecycle: scheduling, updates, and cancellations.
 package com.hireconnect.interviewservice;
 
 import org.springframework.boot.SpringApplication;

@@ -1,6 +1,5 @@
 // [Disha Gujar] : Entry point for the Admin Server — Spring Boot Admin dashboard for production-grade observability.
-// Aggregates health status, JVM metrics, log levels, environment properties, and HTTP traces
-// from all registered HireConnect microservices in a single management UI.
+// [Disha Gujar] : Aggregates health status, JVM metrics, and logging from all registered microservices.
 package com.adminserver;
 
 import org.springframework.boot.SpringApplication;

@@ -32,6 +32,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    // [Disha Gujar] : Initiates a payment process by creating a Razorpay order.
     @PostMapping("/create-order")
     public ResponseEntity<PaymentOrderResponseDto> createOrder(
             Authentication authentication,
@@ -43,6 +44,7 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.createOrder(user, request));
     }
 
+    // [Disha Gujar] : Verifies the Razorpay payment signature after a successful client-side payment.
     @PostMapping("/verify")
     public ResponseEntity<PaymentResponseDto> verifyPayment(
             Authentication authentication,
@@ -54,6 +56,7 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.verifyPayment(user, request));
     }
 
+    // [Disha Gujar] : Retrieves all payment transaction history for the currently logged-in user.
     @GetMapping("/me")
     public ResponseEntity<List<PaymentResponseDto>> getMyPayments(Authentication authentication) {
         AuthenticatedUser user = (AuthenticatedUser) authentication.getPrincipal();
@@ -61,6 +64,7 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getMyPayments(user));
     }
 
+    // [Disha Gujar] : Webhook endpoint to receive server-to-server notifications from Razorpay.
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(
             @RequestHeader("X-Razorpay-Signature") String signature,

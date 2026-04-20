@@ -45,24 +45,28 @@ public class AuthController {
     private final AuthService authService;
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
+    // [Disha Gujar] : Handles new user registration for candidates and recruiters.
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Validated @RequestBody RegisterRequest request) {
         log.info("Register request received for email: {}, role: {}", request.getEmail(), request.getRole());
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
 
+    // [Disha Gujar] : Authenticates user credentials and returns access/refresh tokens.
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Validated @RequestBody LoginRequest request) {
         log.info("Login request received for email: {}", request.getEmail());
         return ResponseEntity.ok(authService.login(request));
     }
 
+    // [Disha Gujar] : Generates a new access token using a valid refresh token.
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(@Validated @RequestBody RefreshTokenRequest request) {
         log.info("Refresh token request received");
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
+    // [Disha Gujar] : Initiates the password recovery process by sending an OTP.
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@Validated @RequestBody ForgotPasswordRequest request) {
         log.info("Forgot password request received for email: {}", request.getEmail());
@@ -70,6 +74,7 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent successfully to your email");
     }
 
+    // [Disha Gujar] : Resets the user password after verifying the OTP.
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@Validated @RequestBody ResetPasswordRequest request) {
         log.info("Reset password request received for email: {}", request.getEmail());
@@ -77,6 +82,7 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
+    // [Disha Gujar] : Validates a JWT token — used by the API Gateway for auth-checks.
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validateToken(
             @RequestHeader("Authorization") String authHeader) {
@@ -84,6 +90,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.validateToken(authHeader));
     }
 
+    // [Disha Gujar] : Redirects to Google OAuth2 login with session-stored role selection.
     @GetMapping("/oauth2/authorize/google")
     public void authorizeGoogle(
             @RequestParam("role") String roleParam,

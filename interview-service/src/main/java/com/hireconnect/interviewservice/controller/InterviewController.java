@@ -30,6 +30,7 @@ public class InterviewController {
 
     private final InterviewService interviewService;
 
+    // [Disha Gujar] : Allows a recruiter to schedule an interview for a candidate.
     @PostMapping
     public ResponseEntity<InterviewResponseDto> scheduleInterview(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -41,6 +42,7 @@ public class InterviewController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // [Disha Gujar] : Retrieves all interviews scheduled by the currently logged-in recruiter.
     @GetMapping("/recruiter")
     public ResponseEntity<List<InterviewResponseDto>> getRecruiterInterviews(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -50,6 +52,7 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.getRecruiterInterviews(user));
     }
 
+    // [Disha Gujar] : Retrieves all interviews assigned to the currently logged-in candidate.
     @GetMapping("/candidate")
     public ResponseEntity<List<InterviewResponseDto>> getCandidateInterviews(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -69,6 +72,7 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.getInterviewDetails(user, interviewId));
     }
 
+    // [Disha Gujar] : Updates the details of a scheduled interview.
     @PutMapping("/{interviewId}")
     public ResponseEntity<InterviewResponseDto> updateInterview(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -80,6 +84,7 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.updateInterview(user, interviewId, requestDto));
     }
 
+    // [Disha Gujar] : Cancels a scheduled interview and notifies the candidate.
     @DeleteMapping("/cancel/{interviewId}")
     public ResponseEntity<InterviewResponseDto> cancelInterview(
             @AuthenticationPrincipal AuthenticatedUser user,

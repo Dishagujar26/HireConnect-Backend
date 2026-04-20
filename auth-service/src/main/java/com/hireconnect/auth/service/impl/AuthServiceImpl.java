@@ -32,6 +32,8 @@ import com.hireconnect.auth.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 
+// [Disha Gujar] : Service implementation for core authentication and security operations.
+// Handles user registration, JWT-based login, token validation, and secure password recovery.
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -49,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${auth.reset-otp-expiration-minutes}")
     private long resetOtpExpirationMinutes;
 
+    // [Disha Gujar] : Registers a new user (LOCAL provider) and generates initial access/refresh tokens.
     @Override
     public AuthResponse register(RegisterRequest request) {
         log.info("Registration started for email: {}, role: {}", request.getEmail(), request.getRole());
@@ -84,6 +87,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    // [Disha Gujar] : Validates user credentials and issues fresh JWT and Refresh tokens upon success.
     @Override
     public AuthResponse login(LoginRequest request) {
         log.info("Login started for email: {}", request.getEmail());
@@ -122,6 +126,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    // [Disha Gujar] : Exchanges a valid refresh token for a new access token to maintain session continuity.
     @Override
     public AuthResponse refreshToken(RefreshTokenRequest request) {
         log.info("Refresh token flow started");
@@ -150,6 +155,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    // [Disha Gujar] : Generates a secure OTP for password recovery and dispatches it via the Notification Service.
     @Override
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
@@ -217,6 +223,7 @@ public class AuthServiceImpl implements AuthService {
                 user.getUserId(), user.getEmail());
     }
 
+    // [Disha Gujar] : Finalizes the password reset process by verifying the OTP and updating the user's password hash.
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
@@ -249,6 +256,7 @@ public class AuthServiceImpl implements AuthService {
         log.info("Password reset successful for userId: {}, email: {}", user.getUserId(), user.getEmail());
     }
 
+    // [Disha Gujar] : Decodes and validates a JWT token, returning user details for gateway authorization checks.
     @Override
     public TokenValidationResponse validateToken(String token) {
         log.info("Token validation started");

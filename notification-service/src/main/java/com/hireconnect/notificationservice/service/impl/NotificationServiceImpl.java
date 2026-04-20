@@ -21,6 +21,8 @@ import com.hireconnect.notificationservice.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+// [Disha Gujar] : Service implementation for in-app and email notifications.
+// Handles notification creation from Kafka events and user management (read/delete).
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -31,6 +33,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationMapper notificationMapper;
     private final EmailService emailService;
 
+    // [Disha Gujar] : Persists an in-app notification and optionally dispatches a transactional email.
     @Override
     @Transactional
     public NotificationResponseDto createNotification(NotificationCreateRequestDto requestDto) {
@@ -68,6 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationMapper.toResponseDto(savedNotification);
     }
 
+    // [Disha Gujar] : Retrieves a paginated list of notifications for the authenticated user.
     @Override
     @Transactional(readOnly = true)
     public Page<NotificationResponseDto> getMyNotifications(AuthenticatedUser user, int page, int size) {
@@ -78,6 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .map(notificationMapper::toResponseDto);
     }
 
+    // [Disha Gujar] : Returns the total number of unread notifications for the user.
     @Override
     @Transactional(readOnly = true)
     public long getUnreadCount(AuthenticatedUser user) {
@@ -85,6 +90,7 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationRepository.countByUserIdAndIsReadFalse(user.getUserId());
     }
 
+    // [Disha Gujar] : Marks a specific notification as read after ownership verification.
     @Override
     @Transactional
     public NotificationResponseDto markAsRead(AuthenticatedUser user, Long notificationId) {

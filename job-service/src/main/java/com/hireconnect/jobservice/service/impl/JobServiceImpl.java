@@ -22,6 +22,8 @@ import com.hireconnect.jobservice.specification.JobSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+// [Disha Gujar] : Service implementation for job management business logic.
+// [Disha Gujar] : Manages the complete lifecycle of job postings including search, updates, and promotion.
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -30,6 +32,7 @@ public class JobServiceImpl implements JobService {
     private final JobRepository jobRepository;
     private final JobMapper jobMapper;
 
+    // [Disha Gujar] : Creates a new job posting after verifying the user is a recruiter.
     @Override
     @Transactional
     public JobResponseDto createJob(Long userId, Role role, JobRequestDto requestDto) {
@@ -43,6 +46,7 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(savedJob);
     }
 
+    // [Disha Gujar] : Updates existing job details if the recruiter owns the posting.
     @Override
     @Transactional
     public JobResponseDto updateJob(Long jobId, Long userId, Role role, JobRequestDto requestDto) {
@@ -68,6 +72,7 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(updatedJob);
     }
 
+    // [Disha Gujar] : Deletes a job posting after verifying recruiter ownership.
     @Override
     @Transactional
     public void deleteJob(Long jobId, Long userId, Role role) {
@@ -81,6 +86,7 @@ public class JobServiceImpl implements JobService {
         log.info("Job deleted successfully for jobId={} by recruiterId={}", jobId, userId);
     }
 
+    // [Disha Gujar] : Retrieves all job postings created by the authenticated recruiter.
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> getMyJobs(Long userId, Role role) {
@@ -93,6 +99,7 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
+    // [Disha Gujar] : Retrieves all job postings currently in OPEN status for candidates.
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> getAllOpenJobs() {
@@ -104,6 +111,7 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
+    // [Disha Gujar] : Fetches details for a single job if it is currently OPEN.
     @Override
     @Transactional(readOnly = true)
     public JobResponseDto getOpenJobById(Long jobId) {
@@ -115,6 +123,7 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(job);
     }
 
+    // [Disha Gujar] : Performs a multi-criteria search for OPEN jobs using specifications.
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> searchOpenJobs(
@@ -141,6 +150,7 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
+    // [Disha Gujar] : Internal helper to verify if a job exists by its unique identifier.
     @Override
     @Transactional(readOnly = true)
     public boolean doesJobExist(Long jobId) {
@@ -148,6 +158,7 @@ public class JobServiceImpl implements JobService {
         return jobRepository.existsByJobId(jobId);
     }
 
+    // [Disha Gujar] : Internal helper to verify if a job is currently in OPEN status.
     @Override
     @Transactional(readOnly = true)
     public boolean isJobOpen(Long jobId) {
@@ -155,6 +166,7 @@ public class JobServiceImpl implements JobService {
         return jobRepository.existsByJobIdAndStatus(jobId, JobStatus.OPEN);
     }
 
+    // [Disha Gujar] : Internal helper to verify if a specific recruiter owns a specific job posting.
     @Override
     @Transactional(readOnly = true)
     public boolean isJobOwnedByRecruiter(Long jobId, Long recruiterId) {
@@ -172,6 +184,7 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
+    // [Disha Gujar] : Internal helper to lookup the recruiter ID associated with a specific job.
     @Override
     @Transactional(readOnly = true)
     public Long getRecruiterIdByJobId(Long jobId) {
@@ -188,6 +201,7 @@ public class JobServiceImpl implements JobService {
         }
     }
     
+    // [Disha Gujar] : Marks a job as featured after successful payment verification.
     @Override
     @Transactional
     public void markAsFeatured(Long jobId, Long recruiterId, Role role) {

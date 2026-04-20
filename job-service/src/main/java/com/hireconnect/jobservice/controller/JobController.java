@@ -29,6 +29,7 @@ public class JobController {
 
     private final JobService jobService;
 
+    // [Disha Gujar] : Endpoint to create a new job posting by a recruiter.
     @PostMapping
     public ResponseEntity<JobResponseDto> createJob(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -44,6 +45,7 @@ public class JobController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // [Disha Gujar] : Endpoint to update an existing job posting owned by the recruiter.
     @PutMapping("/{jobId}")
     public ResponseEntity<JobResponseDto> updateJob(
             @PathVariable Long jobId,
@@ -61,6 +63,7 @@ public class JobController {
         return ResponseEntity.ok(response);
     }
 
+    // [Disha Gujar] : Endpoint to delete a job posting owned by the recruiter.
     @DeleteMapping("/{jobId}")
     public ResponseEntity<String> deleteJob(
             @PathVariable Long jobId,
@@ -72,6 +75,7 @@ public class JobController {
         return ResponseEntity.ok("Job deleted successfully");
     }
 
+    // [Disha Gujar] : Retrieves all job postings created by the currently logged-in recruiter.
     @GetMapping("/recruiter/me")
     public ResponseEntity<List<JobResponseDto>> getMyJobs(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -80,6 +84,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.getMyJobs(user.getUserId(), user.getRole()));
     }
 
+    // [Disha Gujar] : Public endpoint to fetch all available job postings in OPEN status.
     @GetMapping
     public ResponseEntity<List<JobResponseDto>> getAllOpenJobs() {
         log.info("Fetch all open jobs request received");
@@ -92,6 +97,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.getOpenJobById(jobId));
     }
 
+    // [Disha Gujar] : Public endpoint to search for open jobs using various filters.
     @GetMapping("/search")
     public ResponseEntity<List<JobResponseDto>> searchJobs(
             @RequestParam(required = false) String keyword,
@@ -147,6 +153,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.getRecruiterIdByJobId(jobId));
     }
     
+    // [Disha Gujar] : Marks a job as featured (promoted) after successful payment.
     @PutMapping("/{jobId}/feature")
     public ResponseEntity<String> markJobAsFeatured(
             @PathVariable Long jobId,
