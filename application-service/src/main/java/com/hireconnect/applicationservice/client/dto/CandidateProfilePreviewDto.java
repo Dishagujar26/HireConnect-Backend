@@ -1,0 +1,27 @@
+package com.hireconnect.applicationservice.client.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+/**
+ * Data transfer object representing CandidateProfilePreview data.
+ *
+ * @author Disha Gujar
+ */
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CandidateProfilePreviewDto {
+    private Long userId;
+    private String firstName;
+    private String lastName;
+    private String headline;
+    private String location;
+    private String profilePictureUrl;
+    private String resumeUrl;
+}
