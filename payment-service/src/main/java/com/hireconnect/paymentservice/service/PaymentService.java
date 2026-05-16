@@ -8,7 +8,11 @@ import com.hireconnect.paymentservice.dto.response.PaymentOrderResponseDto;
 import com.hireconnect.paymentservice.dto.response.PaymentResponseDto;
 import com.hireconnect.paymentservice.security.AuthenticatedUser;
 
-// [Disha Gujar] : Service interface defining the business logic contract for payment processing.
+/**
+ * Service interface defining the business logic contract for payment processing.
+ *
+ * @author Disha Gujar
+ */
 // Handles Razorpay order creation for job-feature purchases, HMAC-SHA256 signature-based payment
 // verification, payment history retrieval per user, and Razorpay webhook event handling.
 public interface PaymentService {

@@ -10,6 +10,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing JobRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -46,6 +51,11 @@ public class JobRequestDto {
 
     @NotNull(message = "Status is required")
     private JobStatus status;
+    /**
+     * Checks if salary range valid.
+     *
+     * @author Disha Gujar
+     */
 
     @AssertTrue(message = "Maximum salary must be greater than or equal to minimum salary")
     public boolean isSalaryRangeValid() {

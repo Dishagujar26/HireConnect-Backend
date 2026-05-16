@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing UserCredential.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "user_credentials")

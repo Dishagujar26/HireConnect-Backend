@@ -12,6 +12,11 @@ import com.hireconnect.notificationservice.service.NotificationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+/**
+ * REST Controller exposing endpoints for InternalNotification operations.
+ *
+ * @author Disha Gujar
+ */
 
 @RestController
 @RequestMapping("/internal/notifications")
@@ -21,6 +26,11 @@ public class InternalNotificationController {
     private static final Logger logger = LoggerFactory.getLogger(InternalNotificationController.class);
 
     private final NotificationService notificationService;
+    /**
+     * Creates notification.
+     *
+     * @author Disha Gujar
+     */
 
     @PostMapping
     public ResponseEntity<NotificationResponseDto> createNotification(

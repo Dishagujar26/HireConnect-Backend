@@ -8,6 +8,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.hireconnect.jobservice.entity.Job;
 import com.hireconnect.jobservice.entity.JobStatus;
+/**
+ * Repository interface for database operations related to Job entities.
+ *
+ * @author Disha Gujar
+ */
 
 public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
 

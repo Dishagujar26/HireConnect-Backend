@@ -6,6 +6,11 @@ import com.hireconnect.notificationservice.enums.NotificationType;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing Notification.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "notifications")
@@ -38,6 +43,11 @@ public class Notification {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {

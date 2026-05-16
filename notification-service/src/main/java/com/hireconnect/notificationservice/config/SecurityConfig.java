@@ -20,6 +20,12 @@ import com.hireconnect.notificationservice.security.TrustedHeaderAuthenticationF
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Security configuration for the Notification Service.
+ * Configures stateless session management, CORS, and custom authentication filters
+ * for trusted inter-service communication.
+ * @author Disha Gujar
+ */
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -28,12 +34,22 @@ public class SecurityConfig {
 
     private final TrustedHeaderAuthenticationFilter trustedHeaderAuthenticationFilter;
 
+    /**
+     * Configures the HTTP security filter chain.
+     * Disables CSRF, sets session policy to stateless, and adds trusted header authentication filter.
+     * 
+     * @param http the HttpSecurity object to configure
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
+     
+ * @author Disha Gujar
+ */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Configuring security filter chain for notification-service");
 
         http
-                .cors(cors -> {})
+                .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -61,19 +77,4 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        logger.info("Applying CORS configuration for frontend origin: http://localhost:4200");
-
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
 }

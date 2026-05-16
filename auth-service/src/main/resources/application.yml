@@ -1,88 +1,11 @@
-server:
-  port: 8081
-
 spring:
   application:
     name: auth-service
-
-  mvc:
-    pathmatch:
-      matching-strategy: ANT_PATH_MATCHER
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/hireconnect_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - openid
-              - profile
-              - email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  config:
+    import: "configserver:http://localhost:8888"
 
 eureka:
   instance:
+    prefer-ip-address: true
     hostname: localhost
-    prefer-ip-address: false
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000
-  refresh-expiration: 604800000
-
-auth:
-  reset-otp-expiration-minutes: 10
-  oauth-success-redirect-url: http://localhost:4200/oauth-success
-  oauth-failure-redirect-url: http://localhost:4200/login
-
-logging:
-  file:
-    path: ../logs/auth-service
-
-app:
-  kafka:
-    notification-topic: hireconnect-notifications
-
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-spring.cloud.compatibility-verifier.enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
+    ip-address: localhost

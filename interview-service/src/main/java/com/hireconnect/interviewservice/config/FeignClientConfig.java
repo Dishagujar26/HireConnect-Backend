@@ -8,6 +8,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import feign.RequestInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
+/**
+ * Configuration class for FeignClientConfig.
+ *
+ * @author Disha Gujar
+ */
 
 @Configuration
 public class FeignClientConfig {
@@ -15,6 +20,11 @@ public class FeignClientConfig {
     private static final String USER_ID_HEADER = "X-Auth-User-Id";
     private static final String EMAIL_HEADER = "X-Auth-User-Email";
     private static final String ROLE_HEADER = "X-Auth-User-Role";
+    /**
+     * Request interceptor.
+     *
+     * @author Disha Gujar
+     */
 
     @Bean
     public RequestInterceptor requestInterceptor() {

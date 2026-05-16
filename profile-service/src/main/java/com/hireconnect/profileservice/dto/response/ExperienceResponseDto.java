@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+/**
+ * Data transfer object representing ExperienceResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -24,4 +29,6 @@ public class ExperienceResponseDto {
     private LocalDate endDate;
     private Boolean currentlyWorking;
     private String description;
+    private String industry;
 }
+

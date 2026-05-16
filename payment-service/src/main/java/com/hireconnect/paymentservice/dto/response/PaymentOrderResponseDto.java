@@ -4,6 +4,11 @@ import java.math.BigDecimal;
 
 import lombok.Builder;
 import lombok.Data;
+/**
+ * Data transfer object representing PaymentOrderResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @Builder

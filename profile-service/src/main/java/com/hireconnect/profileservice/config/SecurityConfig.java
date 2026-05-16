@@ -15,12 +15,22 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import jakarta.servlet.http.HttpServletResponse;
+/**
+ * Configuration class for SecurityConfig.
+ *
+ * @author Disha Gujar
+ */
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
 	private final TrustedHeaderAuthenticationFilter trustedHeaderAuthenticationFilter;
+    /**
+     * Security filter chain.
+     *
+     * @author Disha Gujar
+     */
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

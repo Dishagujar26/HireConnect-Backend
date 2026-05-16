@@ -7,6 +7,11 @@ import com.hireconnect.paymentservice.enums.PaymentPurpose;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+/**
+ * Data transfer object representing CreatePaymentOrderRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 public class CreatePaymentOrderRequestDto {

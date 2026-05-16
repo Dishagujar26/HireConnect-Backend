@@ -4,10 +4,20 @@ import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+/**
+ * Service interface defining the contract for PublicEndpoint business logic.
+ *
+ * @author Disha Gujar
+ */
 
 @Component
 @Slf4j
 public class PublicEndpointService {
+    /**
+     * Checks if public.
+     *
+     * @author Disha Gujar
+     */
 
     public boolean isPublic(HttpServletRequest request) {
         String path = request.getRequestURI();

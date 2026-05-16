@@ -4,9 +4,19 @@ import org.springframework.stereotype.Component;
 
 import com.hireconnect.notificationservice.dto.response.NotificationResponseDto;
 import com.hireconnect.notificationservice.entity.Notification;
+/**
+ * Domain entity or core component representing NotificationMapper.
+ *
+ * @author Disha Gujar
+ */
 
 @Component
 public class NotificationMapper {
+    /**
+     * To response dto.
+     *
+     * @author Disha Gujar
+     */
 
     public NotificationResponseDto toResponseDto(Notification notification) {
         return NotificationResponseDto.builder()

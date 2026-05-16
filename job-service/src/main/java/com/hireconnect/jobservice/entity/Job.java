@@ -17,6 +17,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+/**
+ * Domain entity or core component representing Job.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "jobs")
@@ -79,12 +84,22 @@ public class Job {
     
     @Column(name = "is_featured")
     private Boolean isFeatured = false;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+    /**
+     * On update.
+     *
+     * @author Disha Gujar
+     */
 
     @PreUpdate
     public void onUpdate() {

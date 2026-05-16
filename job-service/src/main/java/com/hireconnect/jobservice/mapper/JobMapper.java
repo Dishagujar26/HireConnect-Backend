@@ -5,9 +5,19 @@ import org.springframework.stereotype.Component;
 import com.hireconnect.jobservice.dto.request.JobRequestDto;
 import com.hireconnect.jobservice.dto.response.JobResponseDto;
 import com.hireconnect.jobservice.entity.Job;
+/**
+ * Domain entity or core component representing JobMapper.
+ *
+ * @author Disha Gujar
+ */
 
 @Component
 public class JobMapper {
+    /**
+     * To entity.
+     *
+     * @author Disha Gujar
+     */
 
     public Job toEntity(JobRequestDto requestDto, Long recruiterId) {
         return Job.builder()
@@ -24,6 +34,11 @@ public class JobMapper {
                 .recruiterId(recruiterId)
                 .build();
     }
+    /**
+     * Updates entity.
+     *
+     * @author Disha Gujar
+     */
 
     public void updateEntity(Job job, JobRequestDto requestDto) {
         job.setTitle(requestDto.getTitle());
@@ -37,6 +52,11 @@ public class JobMapper {
         job.setSkillsRequired(requestDto.getSkillsRequired());
         job.setStatus(requestDto.getStatus());
     }
+    /**
+     * To response dto.
+     *
+     * @author Disha Gujar
+     */
 
     public JobResponseDto toResponseDto(Job job) {
         return JobResponseDto.builder()

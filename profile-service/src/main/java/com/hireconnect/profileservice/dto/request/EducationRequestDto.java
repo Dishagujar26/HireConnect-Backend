@@ -7,6 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+/**
+ * Data transfer object representing EducationRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -22,4 +27,6 @@ public class EducationRequestDto {
     private LocalDate endDate;
     private String grade;
     private String description;
+    private Boolean currentlyStudying;
 }
+

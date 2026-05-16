@@ -9,6 +9,11 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing InterviewUpdateRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

@@ -9,6 +9,11 @@ import com.hireconnect.paymentservice.enums.Role;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing Payment.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "payments")
@@ -54,12 +59,22 @@ public class Payment {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+    /**
+     * On update.
+     *
+     * @author Disha Gujar
+     */
 
     @PreUpdate
     public void onUpdate() {

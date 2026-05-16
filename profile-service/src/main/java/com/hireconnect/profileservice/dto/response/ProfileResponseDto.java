@@ -7,8 +7,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+/**
+ * Data transfer object representing ProfileResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -27,6 +34,17 @@ public class ProfileResponseDto {
     private String location;
     private String about;
     private String profilePictureUrl;
+
+    // ─── Extended Candidate Fields ────────────────────────────────────────────
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String nationality;
+    private Integer noticePeriodDays;
+    private Long expectedSalary;
+    private Long currentSalary;
+    private String preferredWorkMode;
+    private BigDecimal totalExperienceYears;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -37,3 +55,4 @@ public class ProfileResponseDto {
     private ResumeResponseDto resume;
     private RecruiterDetailResponseDto recruiterDetail;
 }
+

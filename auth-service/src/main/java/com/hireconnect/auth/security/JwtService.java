@@ -14,6 +14,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
+/**
+ * Service for handling JSON Web Tokens (JWT).
+ * Provides methods for generating, parsing, and validating JWT tokens.
+ * @author Disha Gujar
+ */
 @Service
 public class JwtService {
 
@@ -27,6 +32,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * Generates a JWT token for the given user.
+     * 
+     * @param user the user credentials
+     * @return a signed JWT token string
+     
+ * @author Disha Gujar
+ */
     public String generateToken(UserCredential user) {
         return Jwts.builder()
                 .subject(user.getEmail())
@@ -39,6 +52,14 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Extracts the email (subject) from the JWT token.
+     * 
+     * @param token the JWT token
+     * @return the email subject
+     
+ * @author Disha Gujar
+ */
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
@@ -51,14 +72,38 @@ public class JwtService {
                 .getPayload();
     }
 
+    /**
+     * Extracts the user ID from the JWT token.
+     * 
+     * @param token the JWT token
+     * @return the user ID
+     
+ * @author Disha Gujar
+ */
     public Long extractUserId(String token) {
         return extractAllClaims(token).get("userId", Long.class);
     }
 
+    /**
+     * Extracts the user role from the JWT token.
+     * 
+     * @param token the JWT token
+     * @return the role name
+     
+ * @author Disha Gujar
+ */
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
+    /**
+     * Validates if the JWT token is not expired.
+     * 
+     * @param token the JWT token
+     * @return true if valid, false otherwise
+     
+ * @author Disha Gujar
+ */
     public boolean isTokenValid(String token) {
         return !isTokenExpired(token);
     }

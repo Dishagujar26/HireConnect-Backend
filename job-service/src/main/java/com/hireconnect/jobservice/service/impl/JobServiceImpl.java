@@ -22,8 +22,12 @@ import com.hireconnect.jobservice.specification.JobSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// [Disha Gujar] : Service implementation for job management business logic.
-// [Disha Gujar] : Manages the complete lifecycle of job postings including search, updates, and promotion.
+/**
+ * Implementation of the JobService.
+ * Handles the business logic for the complete lifecycle of job postings,
+ * including creation, updates, deletion, search, and promotion.
+ * @author Disha Gujar
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,7 +36,16 @@ public class JobServiceImpl implements JobService {
     private final JobRepository jobRepository;
     private final JobMapper jobMapper;
 
-    // [Disha Gujar] : Creates a new job posting after verifying the user is a recruiter.
+    /**
+     * Creates a new job posting.
+     * 
+     * @param userId the ID of the recruiter
+     * @param role the role of the user
+     * @param requestDto the job creation request data
+     * @return the created JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
     public JobResponseDto createJob(Long userId, Role role, JobRequestDto requestDto) {
@@ -46,7 +59,17 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(savedJob);
     }
 
-    // [Disha Gujar] : Updates existing job details if the recruiter owns the posting.
+    /**
+     * Updates an existing job posting.
+     * 
+     * @param jobId the ID of the job
+     * @param userId the ID of the recruiter
+     * @param role the role of the user
+     * @param requestDto the updated job data
+     * @return the updated JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
     public JobResponseDto updateJob(Long jobId, Long userId, Role role, JobRequestDto requestDto) {
@@ -72,7 +95,15 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(updatedJob);
     }
 
-    // [Disha Gujar] : Deletes a job posting after verifying recruiter ownership.
+    /**
+     * Deletes a job posting.
+     * 
+     * @param jobId the ID of the job
+     * @param userId the ID of the recruiter
+     * @param role the role of the user
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
     public void deleteJob(Long jobId, Long userId, Role role) {
@@ -86,7 +117,15 @@ public class JobServiceImpl implements JobService {
         log.info("Job deleted successfully for jobId={} by recruiterId={}", jobId, userId);
     }
 
-    // [Disha Gujar] : Retrieves all job postings created by the authenticated recruiter.
+    /**
+     * Retrieves all jobs created by the authenticated recruiter.
+     * 
+     * @param userId the ID of the recruiter
+     * @param role the role of the user
+     * @return a list of JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> getMyJobs(Long userId, Role role) {
@@ -99,7 +138,13 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
-    // [Disha Gujar] : Retrieves all job postings currently in OPEN status for candidates.
+    /**
+     * Retrieves all job postings that are currently OPEN.
+     * 
+     * @return a list of open JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> getAllOpenJobs() {
@@ -111,7 +156,14 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
-    // [Disha Gujar] : Fetches details for a single job if it is currently OPEN.
+    /**
+     * Retrieves an open job by its ID.
+     * 
+     * @param jobId the ID of the job
+     * @return the JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public JobResponseDto getOpenJobById(Long jobId) {
@@ -123,7 +175,19 @@ public class JobServiceImpl implements JobService {
         return jobMapper.toResponseDto(job);
     }
 
-    // [Disha Gujar] : Performs a multi-criteria search for OPEN jobs using specifications.
+    /**
+     * Searches for open jobs based on various criteria using Specifications.
+     * 
+     * @param keyword search keyword
+     * @param location location filter
+     * @param jobType job type filter
+     * @param experienceLevel experience level filter
+     * @param minSalary minimum salary
+     * @param maxSalary maximum salary
+     * @return a list of matching JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public List<JobResponseDto> searchOpenJobs(
@@ -150,7 +214,14 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
-    // [Disha Gujar] : Internal helper to verify if a job exists by its unique identifier.
+    /**
+     * Internal helper to verify if a job exists.
+     * 
+     * @param jobId the ID of the job
+     * @return true if exists, false otherwise
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public boolean doesJobExist(Long jobId) {
@@ -158,7 +229,14 @@ public class JobServiceImpl implements JobService {
         return jobRepository.existsByJobId(jobId);
     }
 
-    // [Disha Gujar] : Internal helper to verify if a job is currently in OPEN status.
+    /**
+     * Internal helper to verify if a job is open.
+     * 
+     * @param jobId the ID of the job
+     * @return true if open, false otherwise
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public boolean isJobOpen(Long jobId) {
@@ -166,13 +244,26 @@ public class JobServiceImpl implements JobService {
         return jobRepository.existsByJobIdAndStatus(jobId, JobStatus.OPEN);
     }
 
-    // [Disha Gujar] : Internal helper to verify if a specific recruiter owns a specific job posting.
+    /**
+     * Internal helper to verify if a recruiter owns a specific job.
+     * 
+     * @param jobId the ID of the job
+     * @param recruiterId the ID of the recruiter
+     * @return true if owned, false otherwise
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public boolean isJobOwnedByRecruiter(Long jobId, Long recruiterId) {
         log.debug("Checking ownership for jobId={} and recruiterId={}", jobId, recruiterId);
         return jobRepository.findByJobIdAndRecruiterId(jobId, recruiterId).isPresent();
     }
+    /**
+     * Retrieves job ids by recruiter.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     @Transactional(readOnly = true)
@@ -184,7 +275,14 @@ public class JobServiceImpl implements JobService {
                 .toList();
     }
 
-    // [Disha Gujar] : Internal helper to lookup the recruiter ID associated with a specific job.
+    /**
+     * Internal helper to lookup the recruiter ID for a specific job.
+     * 
+     * @param jobId the ID of the job
+     * @return the recruiter ID
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public Long getRecruiterIdByJobId(Long jobId) {
@@ -201,7 +299,15 @@ public class JobServiceImpl implements JobService {
         }
     }
     
-    // [Disha Gujar] : Marks a job as featured after successful payment verification.
+    /**
+     * Marks a job as featured (promoted).
+     * 
+     * @param jobId the ID of the job
+     * @param recruiterId the ID of the recruiter
+     * @param role the role of the user
+     
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
     public void markAsFeatured(Long jobId, Long recruiterId, Role role) {
@@ -215,5 +321,70 @@ public class JobServiceImpl implements JobService {
         job.setIsFeatured(true);
         jobRepository.save(job);
         log.info("Job marked as featured successfully for jobId={} by recruiterId={}", jobId, recruiterId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<com.hireconnect.jobservice.dto.response.RecommendedJobResponseDto> getRecommendedJobs(List<String> candidateSkills, int topN) {
+        log.info("Fetching recommended jobs based on skills");
+        List<Job> openJobs = jobRepository.findAll().stream()
+                .filter(job -> job.getStatus() == JobStatus.OPEN)
+                .toList();
+
+        return openJobs.stream()
+                .map(job -> {
+                    com.hireconnect.jobservice.dto.response.MatchScoreResponseDto scoreDto = calculateMatchScore(job, candidateSkills);
+                    com.hireconnect.jobservice.dto.response.RecommendedJobResponseDto dto = new com.hireconnect.jobservice.dto.response.RecommendedJobResponseDto();
+                    dto.setJob(jobMapper.toResponseDto(job));
+                    dto.setMatchScore(scoreDto.getScore());
+                    dto.setMatchedSkills(scoreDto.getMatchedSkills());
+                    dto.setMissingSkills(scoreDto.getMissingSkills());
+                    return dto;
+                })
+                .sorted((a, b) -> Integer.compare(b.getMatchScore(), a.getMatchScore()))
+                .limit(topN)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.hireconnect.jobservice.dto.response.MatchScoreResponseDto computeMatchScore(Long jobId, List<String> candidateSkills) {
+        log.info("Computing match score for jobId={}", jobId);
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new JobNotFoundException("Job not found for jobId: " + jobId));
+        
+        return calculateMatchScore(job, candidateSkills);
+    }
+
+    private com.hireconnect.jobservice.dto.response.MatchScoreResponseDto calculateMatchScore(Job job, List<String> candidateSkills) {
+        if (job.getSkillsRequired() == null || job.getSkillsRequired().isEmpty()) {
+            return com.hireconnect.jobservice.dto.response.MatchScoreResponseDto.builder()
+                    .score(0).matchedSkills(List.of()).missingSkills(List.of()).build();
+        }
+
+        List<String> requiredSkills = java.util.Arrays.stream(job.getSkillsRequired().split(","))
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .toList();
+
+        List<String> lowerCandidateSkills = candidateSkills.stream()
+                .map(String::toLowerCase)
+                .toList();
+
+        List<String> matched = requiredSkills.stream()
+                .filter(lowerCandidateSkills::contains)
+                .toList();
+
+        List<String> missing = requiredSkills.stream()
+                .filter(s -> !lowerCandidateSkills.contains(s))
+                .toList();
+
+        int score = requiredSkills.isEmpty() ? 0 : (int) (((double) matched.size() / requiredSkills.size()) * 100);
+
+        return com.hireconnect.jobservice.dto.response.MatchScoreResponseDto.builder()
+                .score(score)
+                .matchedSkills(matched)
+                .missingSkills(missing)
+                .build();
     }
 }

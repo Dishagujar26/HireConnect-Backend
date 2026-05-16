@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hireconnect.interviewservice.client.ApplicationServiceClient;
 import com.hireconnect.interviewservice.client.dto.ApplicationSummaryDto;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.hireconnect.interviewservice.dto.request.InterviewScheduleRequestDto;
 import com.hireconnect.interviewservice.dto.request.InterviewUpdateRequestDto;
 import com.hireconnect.interviewservice.dto.response.InterviewResponseDto;
@@ -27,7 +30,11 @@ import com.hireconnect.interviewservice.service.InterviewService;
 
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : Service implementation for interview scheduling and management.
+/**
+ * Service implementation for interview scheduling and management.
+ *
+ * @author Disha Gujar
+ */
 // Handles scheduling, updates, and cancellations of interviews with candidate notifications.
 @Service
 @RequiredArgsConstructor
@@ -39,9 +46,15 @@ public class InterviewServiceImpl implements InterviewService {
     private final ApplicationServiceClient applicationServiceClient;
     private final NotificationEventProducer notificationEventProducer;
 
-    // [Disha Gujar] : Schedules a new interview for a shortlisted job application.
+    /**
+ * Schedules a new interview for a shortlisted job application.
+ *
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
+    @CircuitBreaker(name = "applicationService", fallbackMethod = "applicationServiceFallback")
+    @Retry(name = "applicationService")
     public InterviewResponseDto scheduleInterview(AuthenticatedUser user, InterviewScheduleRequestDto requestDto) {
         log.info("Interview scheduling started by recruiterId: {} for applicationId: {}",
                 user.getUserId(), requestDto.getApplicationId());
@@ -91,7 +104,19 @@ public class InterviewServiceImpl implements InterviewService {
         return mapToResponse(savedInterview);
     }
 
-    // [Disha Gujar] : Retrieves all interviews scheduled by the authenticated recruiter.
+    /**
+     * Fallback for Application Service failure.
+     */
+    public InterviewResponseDto applicationServiceFallback(AuthenticatedUser user, InterviewScheduleRequestDto requestDto, Exception e) {
+        log.error("Application Service unavailable | fallback triggered | error={}", e.getMessage());
+        throw new RuntimeException("Application details could not be verified. Service temporarily unavailable.");
+    }
+
+    /**
+ * Retrieves all interviews scheduled by the authenticated recruiter.
+ *
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public List<InterviewResponseDto> getRecruiterInterviews(AuthenticatedUser user) {
@@ -101,6 +126,7 @@ public class InterviewServiceImpl implements InterviewService {
         List<InterviewResponseDto> interviews = interviewRepository
                 .findByRecruiterIdOrderByScheduledAtDesc(user.getUserId())
                 .stream()
+                .filter(i -> i.getStatus() != InterviewStatus.CANCELLED)
                 .map(this::mapToResponse)
                 .toList();
 
@@ -108,7 +134,11 @@ public class InterviewServiceImpl implements InterviewService {
         return interviews;
     }
 
-    // [Disha Gujar] : Retrieves all interviews assigned to the authenticated candidate.
+    /**
+ * Retrieves all interviews assigned to the authenticated candidate.
+ *
+ * @author Disha Gujar
+ */
     @Override
     @Transactional(readOnly = true)
     public List<InterviewResponseDto> getCandidateInterviews(AuthenticatedUser user) {
@@ -118,12 +148,18 @@ public class InterviewServiceImpl implements InterviewService {
         List<InterviewResponseDto> interviews = interviewRepository
                 .findByCandidateIdOrderByScheduledAtDesc(user.getUserId())
                 .stream()
+                .filter(i -> i.getStatus() != InterviewStatus.CANCELLED)
                 .map(this::mapToResponse)
                 .toList();
 
         log.info("Fetched {} interviews for candidateId: {}", interviews.size(), user.getUserId());
         return interviews;
     }
+    /**
+     * Retrieves interview details.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     @Transactional(readOnly = true)
@@ -150,7 +186,11 @@ public class InterviewServiceImpl implements InterviewService {
         return mapToResponse(interview);
     }
 
-    // [Disha Gujar] : Updates existing interview details (time, link, notes) and status.
+    /**
+ * Updates existing interview details (time, link, notes) and status.
+ *
+ * @author Disha Gujar
+ */
     @Override
     @Transactional
     public InterviewResponseDto updateInterview(AuthenticatedUser user, Long interviewId, InterviewUpdateRequestDto requestDto) {
@@ -175,12 +215,11 @@ public class InterviewServiceImpl implements InterviewService {
         Interview updatedInterview = interviewRepository.save(interview);
         log.info("Interview updated successfully for interviewId: {}, new status: {}",
                 updatedInterview.getId(), updatedInterview.getStatus());
-
+        
         sendInterviewUpdatedNotification(updatedInterview);
         return mapToResponse(updatedInterview);
     }
 
-    // [Disha Gujar] : Cancels a scheduled interview and notifies the candidate.
     @Override
     @Transactional
     public InterviewResponseDto cancelInterview(AuthenticatedUser user, Long interviewId) {
@@ -188,31 +227,75 @@ public class InterviewServiceImpl implements InterviewService {
         validateRecruiter(user.getRole());
 
         Interview interview = interviewRepository.findByIdAndRecruiterId(interviewId, user.getUserId())
-                .orElseThrow(() -> {
-                    log.warn("Interview cancellation failed because interviewId: {} was not found for recruiterId: {}",
-                            interviewId, user.getUserId());
-                    return new ResourceNotFoundException("Interview not found");
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found"));
 
         interview.setStatus(InterviewStatus.CANCELLED);
-        Interview cancelledInterview = interviewRepository.save(interview);
-        log.info("Interview cancelled successfully for interviewId: {}", cancelledInterview.getId());
-
-        sendInterviewCancelledNotification(cancelledInterview);
-        return mapToResponse(cancelledInterview);
+        Interview savedInterview = interviewRepository.save(interview);
+        
+        sendInterviewCancelledNotification(savedInterview);
+        return mapToResponse(savedInterview);
     }
 
     private void validateRecruiter(Role role) {
         if (role != Role.RECRUITER) {
-            log.warn("Recruiter-only action attempted by role: {}", role);
             throw new UnauthorizedException("Only recruiters can perform this action");
         }
     }
 
     private void validateCandidate(Role role) {
         if (role != Role.CANDIDATE) {
-            log.warn("Candidate-only action attempted by role: {}", role);
             throw new UnauthorizedException("Only candidates can perform this action");
+        }
+    }
+
+    @Override
+    @Transactional
+    public InterviewResponseDto completeInterview(AuthenticatedUser user, Long interviewId, com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto requestDto) {
+        log.info("Completing interviewId: {} for recruiterId: {}", interviewId, user.getUserId());
+        validateRecruiter(user.getRole());
+
+        Interview interview = interviewRepository.findByIdAndRecruiterId(interviewId, user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Interview not found"));
+
+        if (interview.getStatus() == InterviewStatus.CANCELLED) {
+            throw new BadRequestException("Cannot complete a cancelled interview");
+        }
+
+        interview.setTechnicalScore(requestDto.getTechnicalScore());
+        interview.setCommunicationScore(requestDto.getCommunicationScore());
+        interview.setFeedback(requestDto.getFeedback());
+        interview.setStatus(InterviewStatus.COMPLETED);
+
+        Interview savedInterview = interviewRepository.save(interview);
+
+        // Automate Selection Logic
+        handleSelectionAction(savedInterview, requestDto.getSelectionAction());
+
+        return mapToResponse(savedInterview);
+    }
+
+    private void handleSelectionAction(Interview interview, com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto.SelectionAction action) {
+        if (action == null || action == com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto.SelectionAction.NO_ACTION) {
+            return;
+        }
+
+        String appStatus = null;
+        if (action == com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto.SelectionAction.HIRE) {
+            appStatus = "ACCEPTED";
+        } else if (action == com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto.SelectionAction.REJECT) {
+            appStatus = "REJECTED";
+        }
+
+        if (appStatus != null) {
+            try {
+                applicationServiceClient.updateApplicationStatus(
+                        interview.getApplicationId(),
+                        com.hireconnect.interviewservice.client.dto.ApplicationStatusUpdateDto.builder().status(appStatus).build()
+                );
+                log.info("Automated selection updated application status to: {} for applicationId: {}", appStatus, interview.getApplicationId());
+            } catch (Exception e) {
+                log.error("Failed to automate application status update for applicationId: {}", interview.getApplicationId(), e);
+            }
         }
     }
 
@@ -229,6 +312,9 @@ public class InterviewServiceImpl implements InterviewService {
                 .meetingLink(interview.getMeetingLink())
                 .location(interview.getLocation())
                 .notes(interview.getNotes())
+                .technicalScore(interview.getTechnicalScore())
+                .communicationScore(interview.getCommunicationScore())
+                .feedback(interview.getFeedback())
                 .status(interview.getStatus())
                 .createdAt(interview.getCreatedAt())
                 .updatedAt(interview.getUpdatedAt())

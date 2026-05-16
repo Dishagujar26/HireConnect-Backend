@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing PasswordResetOtp.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "password_reset_otps")

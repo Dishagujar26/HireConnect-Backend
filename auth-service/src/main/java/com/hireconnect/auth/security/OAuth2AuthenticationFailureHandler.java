@@ -12,6 +12,11 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+/**
+ * Domain entity or core component representing OAuth2AuthenticationFailureHandler.
+ *
+ * @author Disha Gujar
+ */
 
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
@@ -22,6 +27,11 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
     public OAuth2AuthenticationFailureHandler(String failureRedirectUrl) {
         this.failureRedirectUrl = failureRedirectUrl;
     }
+    /**
+     * On authentication failure.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public void onAuthenticationFailure(

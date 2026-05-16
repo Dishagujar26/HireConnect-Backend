@@ -8,6 +8,11 @@ import com.hireconnect.jobservice.entity.JobType;
 
 import lombok.Builder;
 import lombok.Getter;
+/**
+ * Data transfer object representing JobResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Builder

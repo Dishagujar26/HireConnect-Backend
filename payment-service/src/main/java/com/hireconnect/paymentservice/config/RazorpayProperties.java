@@ -5,6 +5,11 @@ import org.springframework.context.annotation.Configuration;
 
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Domain entity or core component representing RazorpayProperties.
+ *
+ * @author Disha Gujar
+ */
 
 @Configuration
 @ConfigurationProperties(prefix = "payment.razorpay")

@@ -13,9 +13,11 @@ import com.hireconnect.notificationservice.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : REST controller exposing in-app notification management endpoints under /api/notifications.
-// Allows authenticated users to fetch paginated notifications, retrieve unread counts,
-// mark individual notifications as read, and delete notifications from their feed.
+/**
+ * REST controller for managing in-app notifications.
+ * Provides endpoints for fetching, marking as read, and deleting notifications.
+ * @author Disha Gujar
+ */
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
@@ -25,7 +27,16 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
-    // [Disha Gujar] : Retrieves a paginated list of notifications for the authenticated user.
+    /**
+     * Retrieves a paginated list of notifications for the authenticated user.
+     * 
+     * @param user the authenticated user
+     * @param page the page number (default 0)
+     * @param size the page size (default 10)
+     * @return a page of NotificationResponseDto
+     
+ * @author Disha Gujar
+ */
     @GetMapping
     public ResponseEntity<Page<NotificationResponseDto>> getMyNotifications(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -36,7 +47,14 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getMyNotifications(user, page, size));
     }
 
-    // [Disha Gujar] : Returns the count of unread notifications for the currently logged-in user.
+    /**
+     * Returns the count of unread notifications for the currently logged-in user.
+     * 
+     * @param user the authenticated user
+     * @return the count of unread notifications
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -45,7 +63,15 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getUnreadCount(user));
     }
 
-    // [Disha Gujar] : Marks a specific notification as read.
+    /**
+     * Marks a specific notification as read.
+     * 
+     * @param user the authenticated user
+     * @param notificationId the ID of the notification to mark as read
+     * @return the updated NotificationResponseDto
+     
+ * @author Disha Gujar
+ */
     @PutMapping("/{notificationId}/read")
     public ResponseEntity<NotificationResponseDto> markAsRead(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -55,7 +81,15 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.markAsRead(user, notificationId));
     }
 
-    // [Disha Gujar] : Deletes a specific notification from the user's history.
+    /**
+     * Deletes a specific notification from the user's history.
+     * 
+     * @param user the authenticated user
+     * @param notificationId the ID of the notification to delete
+     * @return a success message
+     
+ * @author Disha Gujar
+ */
     @DeleteMapping("/{notificationId}")
     public ResponseEntity<String> deleteNotification(
             @AuthenticationPrincipal AuthenticatedUser user,

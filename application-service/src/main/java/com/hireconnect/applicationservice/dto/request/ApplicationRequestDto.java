@@ -3,6 +3,11 @@ package com.hireconnect.applicationservice.dto.request;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing ApplicationRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

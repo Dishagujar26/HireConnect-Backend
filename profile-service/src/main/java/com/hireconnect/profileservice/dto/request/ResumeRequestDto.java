@@ -5,6 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+/**
+ * Data transfer object representing ResumeRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

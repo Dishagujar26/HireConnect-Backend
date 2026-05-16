@@ -11,9 +11,19 @@ import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import com.hireconnect.applicationservice.event.NotificationEvent;
+/**
+ * Configuration class for KafkaProducerConfig.
+ *
+ * @author Disha Gujar
+ */
 
 @Configuration
 public class KafkaProducerConfig {
+    /**
+     * Producer factory.
+     *
+     * @author Disha Gujar
+     */
 
     @Bean
     public ProducerFactory<String, NotificationEvent> producerFactory() {
@@ -26,6 +36,11 @@ public class KafkaProducerConfig {
 
         return new DefaultKafkaProducerFactory<>(config);
     }
+    /**
+     * Kafka template.
+     *
+     * @author Disha Gujar
+     */
 
     @Bean
     public KafkaTemplate<String, NotificationEvent> kafkaTemplate() {

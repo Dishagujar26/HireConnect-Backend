@@ -19,9 +19,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * Domain entity or core component representing Profile.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "profiles")
@@ -64,6 +71,32 @@ public class Profile {
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
 
+    // ─── Extended Candidate Information ──────────────────────────────────────
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "gender")
+    private String gender;
+
+    @Column(name = "nationality")
+    private String nationality;
+
+    @Column(name = "notice_period_days")
+    private Integer noticePeriodDays;
+
+    @Column(name = "expected_salary")
+    private Long expectedSalary;
+
+    @Column(name = "current_salary")
+    private Long currentSalary;
+
+    @Column(name = "preferred_work_mode")
+    private String preferredWorkMode;
+
+    @Column(name = "total_experience_years", precision = 4, scale = 1)
+    private BigDecimal totalExperienceYears;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -91,12 +124,22 @@ public class Profile {
 
     @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
     private RecruiterDetail recruiterDetail;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
+    /**
+     * On update.
+     *
+     * @author Disha Gujar
+     */
 
     @PreUpdate
     public void onUpdate() {

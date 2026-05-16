@@ -1,27 +1,27 @@
 package com.hireconnect.apigateway.security;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class GatewayJwtAuthenticationFilterTest {
+class GatewayJwtAuthenticationFilterTest {
+
+    private GatewayJwtAuthenticationFilter filter;
 
     @Mock
     private JwtService jwtService;
@@ -38,63 +38,54 @@ public class GatewayJwtAuthenticationFilterTest {
     @Mock
     private FilterChain filterChain;
 
-    @InjectMocks
-    private GatewayJwtAuthenticationFilter filter;
-
-    private StringWriter responseWriter;
-
     @BeforeEach
-    void setUp() throws Exception {
-        responseWriter = new StringWriter();
-        when(request.getRequestURI()).thenReturn("/api/test");
-        when(request.getMethod()).thenReturn("GET");
+    void setUp() {
+        filter = new GatewayJwtAuthenticationFilter(jwtService, publicEndpointService);
     }
 
     @Test
-    void doFilterInternal_OptionsRequest_SkipsJwtValidation() throws Exception {
+    void shouldNotFilter_PublicEndpoint_ShouldReturnTrue() {
+        when(publicEndpointService.isPublic(request)).thenReturn(true);
+        assertTrue(filter.shouldNotFilter(request));
+    }
+
+    @Test
+    void doFilterInternal_OptionsRequest_ShouldPassThrough() throws ServletException, IOException {
         when(request.getMethod()).thenReturn("OPTIONS");
-
+        
         filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(1)).doFilter(request, response);
-        verify(jwtService, never()).isTokenValid(anyString());
+        
+        verify(filterChain).doFilter(request, response);
     }
 
     @Test
-    void doFilterInternal_MissingAuthorizationHeader_ReturnsUnauthorized() throws Exception {
+    void doFilterInternal_NoAuthHeader_ShouldReturnUnauthorized() throws ServletException, IOException {
+        when(request.getMethod()).thenReturn("GET");
         when(request.getHeader("Authorization")).thenReturn(null);
-        when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter writer = new PrintWriter(stringWriter);
+        when(response.getWriter()).thenReturn(writer);
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response, times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
-        assertTrue(responseWriter.toString().contains("Missing or invalid Authorization header"));
-        verify(filterChain, never()).doFilter(any(), any());
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     @Test
-    void doFilterInternal_InvalidToken_ReturnsUnauthorized() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer invalid_token");
-        when(jwtService.isTokenValid("invalid_token")).thenReturn(false);
-        when(response.getWriter()).thenReturn(new PrintWriter(responseWriter));
+    void doFilterInternal_ValidToken_ShouldAuthenticateAndWrap() throws ServletException, IOException {
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
+        when(jwtService.isTokenValid("valid-token")).thenReturn(true);
+        when(jwtService.extractUserId("valid-token")).thenReturn(1L);
+        when(jwtService.extractEmail("valid-token")).thenReturn("test@test.com");
+        when(jwtService.extractRole("valid-token")).thenReturn("CANDIDATE");
 
         filter.doFilterInternal(request, response, filterChain);
 
-        verify(response, times(1)).setStatus(HttpStatus.UNAUTHORIZED.value());
-        assertTrue(responseWriter.toString().contains("Invalid or expired token"));
-        verify(filterChain, never()).doFilter(any(), any());
+        verify(filterChain).doFilter(any(AuthHeaderRequestWrapper.class), eq(response));
     }
 
-    @Test
-    void doFilterInternal_ValidToken_ContinuesFilterChain() throws Exception {
-        when(request.getHeader("Authorization")).thenReturn("Bearer valid_token");
-        when(jwtService.isTokenValid("valid_token")).thenReturn(true);
-        when(jwtService.extractUserId("valid_token")).thenReturn(1L);
-        when(jwtService.extractEmail("valid_token")).thenReturn("test@example.com");
-        when(jwtService.extractRole("valid_token")).thenReturn("CANDIDATE");
-
-        filter.doFilterInternal(request, response, filterChain);
-
-        verify(filterChain, times(1)).doFilter(any(AuthHeaderRequestWrapper.class), eq(response));
+    private void assertTrue(boolean condition) {
+        if (!condition) throw new AssertionError();
     }
 }

@@ -17,6 +17,11 @@ import lombok.*;
         )
     }
 )
+/**
+ * Main entry point for the JobApplication.
+ *
+ * @author Disha Gujar
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -55,6 +60,11 @@ public class JobApplication {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {
@@ -64,6 +74,11 @@ public class JobApplication {
             this.status = ApplicationStatus.APPLIED;
         }
     }
+    /**
+     * On update.
+     *
+     * @author Disha Gujar
+     */
 
     @PreUpdate
     public void onUpdate() {

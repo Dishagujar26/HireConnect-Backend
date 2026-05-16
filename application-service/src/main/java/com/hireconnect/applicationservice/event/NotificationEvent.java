@@ -6,6 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+/**
+ * Domain entity or core component representing NotificationEvent.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @NoArgsConstructor

@@ -13,6 +13,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+/**
+ * Domain entity or core component representing SocialLink.
+ *
+ * @author Disha Gujar
+ */
 
 
 @Entity

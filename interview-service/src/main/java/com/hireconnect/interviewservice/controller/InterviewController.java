@@ -18,7 +18,11 @@ import com.hireconnect.interviewservice.service.InterviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : REST controller managing interview scheduling operations under /api/interviews.
+/**
+ * REST controller managing interview scheduling operations under /api/interviews.
+ *
+ * @author Disha Gujar
+ */
 // Provides endpoints for recruiters to schedule, update, and cancel interviews,
 // and for both recruiters and candidates to view their respective interview lists and details.
 @RestController
@@ -30,7 +34,11 @@ public class InterviewController {
 
     private final InterviewService interviewService;
 
-    // [Disha Gujar] : Allows a recruiter to schedule an interview for a candidate.
+    /**
+ * Allows a recruiter to schedule an interview for a candidate.
+ *
+ * @author Disha Gujar
+ */
     @PostMapping
     public ResponseEntity<InterviewResponseDto> scheduleInterview(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -42,7 +50,11 @@ public class InterviewController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // [Disha Gujar] : Retrieves all interviews scheduled by the currently logged-in recruiter.
+    /**
+ * Retrieves all interviews scheduled by the currently logged-in recruiter.
+ *
+ * @author Disha Gujar
+ */
     @GetMapping("/recruiter")
     public ResponseEntity<List<InterviewResponseDto>> getRecruiterInterviews(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -52,7 +64,11 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.getRecruiterInterviews(user));
     }
 
-    // [Disha Gujar] : Retrieves all interviews assigned to the currently logged-in candidate.
+    /**
+ * Retrieves all interviews assigned to the currently logged-in candidate.
+ *
+ * @author Disha Gujar
+ */
     @GetMapping("/candidate")
     public ResponseEntity<List<InterviewResponseDto>> getCandidateInterviews(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -61,6 +77,11 @@ public class InterviewController {
                 user != null ? user.getUserId() : null);
         return ResponseEntity.ok(interviewService.getCandidateInterviews(user));
     }
+    /**
+     * Retrieves interview details.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/{interviewId}")
     public ResponseEntity<InterviewResponseDto> getInterviewDetails(
@@ -72,7 +93,11 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.getInterviewDetails(user, interviewId));
     }
 
-    // [Disha Gujar] : Updates the details of a scheduled interview.
+    /**
+ * Updates the details of a scheduled interview.
+ *
+ * @author Disha Gujar
+ */
     @PutMapping("/{interviewId}")
     public ResponseEntity<InterviewResponseDto> updateInterview(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -84,7 +109,22 @@ public class InterviewController {
         return ResponseEntity.ok(interviewService.updateInterview(user, interviewId, requestDto));
     }
 
-    // [Disha Gujar] : Cancels a scheduled interview and notifies the candidate.
+    @PostMapping("/{interviewId}/complete")
+    public ResponseEntity<InterviewResponseDto> completeInterview(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long interviewId,
+            @Valid @RequestBody com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto requestDto
+    ) {
+        log.info("Complete interview request received for interviewId: {}, recruiterId: {}",
+                interviewId, user != null ? user.getUserId() : null);
+        return ResponseEntity.ok(interviewService.completeInterview(user, interviewId, requestDto));
+    }
+
+    /**
+ * Cancels a scheduled interview and notifies the candidate.
+ *
+ * @author Disha Gujar
+ */
     @DeleteMapping("/cancel/{interviewId}")
     public ResponseEntity<InterviewResponseDto> cancelInterview(
             @AuthenticationPrincipal AuthenticatedUser user,

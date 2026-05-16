@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+/**
+ * Domain entity or core component representing Experience.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "experiences")
@@ -41,6 +46,9 @@ public class Experience {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "industry")
+    private String industry;
 
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)

@@ -33,6 +33,11 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
         customHeaders.put(EMAIL_HEADER,   email);
         customHeaders.put(ROLE_HEADER,    role);
     }
+    /**
+     * Retrieves header.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public String getHeader(String name) {
@@ -44,6 +49,11 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
         }
         return super.getHeader(name);
     }
+    /**
+     * Retrieves headers.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public Enumeration<String> getHeaders(String name) {
@@ -55,6 +65,11 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
         }
         return super.getHeaders(name);
     }
+    /**
+     * Retrieves header names.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public Enumeration<String> getHeaderNames() {
@@ -71,11 +86,21 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
     // ── Multipart delegation ─────────────────────────────────────────────────
     // Without these overrides the servlet container loses the multipart context
     // and Spring's MultipartFile resolution fails with an empty/null file.
+    /**
+     * Retrieves part.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public Part getPart(String name) throws IOException, ServletException {
         return super.getPart(name);
     }
+    /**
+     * Retrieves parts.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public Collection<Part> getParts() throws IOException, ServletException {
@@ -89,12 +114,19 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
      *
      * isFinished() correctly tracks EOF so the servlet container knows when
      * the stream has been fully consumed (avoids IO hangs on some containers).
-     */
+     
+ * @author Disha Gujar
+ */
     @Override
     public ServletInputStream getInputStream() throws IOException {
         InputStream delegate = super.getInputStream();
         return new ServletInputStream() {
             private boolean finished = false;
+    /**
+     * Read.
+     *
+     * @author Disha Gujar
+     */
 
             @Override
             public int read() throws IOException {
@@ -102,6 +134,11 @@ public class AuthHeaderRequestWrapper extends HttpServletRequestWrapper {
                 if (b == -1) finished = true;
                 return b;
             }
+    /**
+     * Read.
+     *
+     * @author Disha Gujar
+     */
 
             @Override
             public int read(byte[] b, int off, int len) throws IOException {

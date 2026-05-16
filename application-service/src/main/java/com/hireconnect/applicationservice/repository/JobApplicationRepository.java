@@ -7,6 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.hireconnect.applicationservice.entity.JobApplication;
+/**
+ * Repository interface for database operations related to JobApplication entities.
+ *
+ * @author Disha Gujar
+ */
 
 @Repository
 public interface JobApplicationRepository extends JpaRepository<JobApplication, Long> {
@@ -22,5 +27,7 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     List<JobApplication> findByJobIdOrderByAppliedAtDesc(Long jobId);
     
     Boolean existsByCandidateIdAndJobId(Long candidateId, Long jobId);
+
+    Optional<JobApplication> findByJobIdAndCandidateId(Long jobId, Long candidateId);
     
 }

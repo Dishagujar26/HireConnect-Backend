@@ -1,83 +1,11 @@
-server:
-  port: 8086
-
 spring:
   application:
     name: notification-service
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/hireconnect_notification_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_APP_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-          debug: true
-
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: notification-service-group-2
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"   # ✅ FIX FOR YOUR ISSUE
+  config:
+    import: "optional:configserver:http://localhost:8888"
 
 eureka:
   instance:
+    prefer-ip-address: true
     hostname: localhost
-    prefer-ip-address: false
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 86400000
-
-logging:
-  file:
-    path: ../logs/notification-service
-  level:
-    root: INFO
-    com.hireconnect.notificationservice: DEBUG
-    org.springframework.security: INFO
-
-app:
-  kafka:
-    notification-topic: hireconnect-notifications
-spring.cloud.compatibility-verifier.enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
+    ip-address: localhost

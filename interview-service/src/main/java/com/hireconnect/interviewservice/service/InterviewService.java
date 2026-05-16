@@ -4,12 +4,13 @@ import java.util.List;
 
 import com.hireconnect.interviewservice.dto.request.InterviewScheduleRequestDto;
 import com.hireconnect.interviewservice.dto.request.InterviewUpdateRequestDto;
+import com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto;
 import com.hireconnect.interviewservice.dto.response.InterviewResponseDto;
 import com.hireconnect.interviewservice.security.AuthenticatedUser;
 
-// [Disha Gujar] : Service interface defining the business logic contract for interview management.
-// Covers interview scheduling by recruiters, retrieval for both recruiter and candidate views,
-// detail lookup by interview ID, interview detail updates, and interview cancellation workflows.
+/**
+ * Service interface defining the business logic contract for interview management.
+ */
 public interface InterviewService {
 
     InterviewResponseDto scheduleInterview(AuthenticatedUser user, InterviewScheduleRequestDto requestDto);
@@ -21,6 +22,8 @@ public interface InterviewService {
     InterviewResponseDto getInterviewDetails(AuthenticatedUser user, Long interviewId);
 
     InterviewResponseDto updateInterview(AuthenticatedUser user, Long interviewId, InterviewUpdateRequestDto requestDto);
+
+    InterviewResponseDto completeInterview(AuthenticatedUser user, Long interviewId, InterviewCompleteRequestDto requestDto);
 
     InterviewResponseDto cancelInterview(AuthenticatedUser user, Long interviewId);
 }

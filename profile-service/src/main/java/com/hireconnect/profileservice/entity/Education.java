@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+/**
+ * Domain entity or core component representing Education.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "educations")
@@ -38,6 +43,9 @@ public class Education {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "currently_studying")
+    private Boolean currentlyStudying;
 
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)

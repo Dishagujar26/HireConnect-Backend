@@ -3,6 +3,11 @@ package com.hireconnect.applicationservice.client.dto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing ApplicationSummary data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

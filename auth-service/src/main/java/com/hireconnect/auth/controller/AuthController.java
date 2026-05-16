@@ -31,9 +31,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : REST controller exposing authentication endpoints under /api/v1/auth.
-// Supports user registration, email/password login, JWT refresh, forgot/reset password via OTP,
-// token validation for the API Gateway, and Google OAuth2 role-selection redirect flow.
+/**
+ * REST controller for authentication and authorization.
+ * Provides endpoints for user registration, login, JWT management,
+ * password recovery, and OAuth2 integration.
+ * @author Disha Gujar
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -45,28 +48,56 @@ public class AuthController {
     private final AuthService authService;
     private final RedirectStrategy redirectStrategy = new DefaultRedirectStrategy();
 
-    // [Disha Gujar] : Handles new user registration for candidates and recruiters.
+    /**
+     * Handles new user registration for candidates and recruiters.
+     * 
+     * @param request the registration request containing user details and role
+     * @return the authentication response with tokens
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Validated @RequestBody RegisterRequest request) {
         log.info("Register request received for email: {}, role: {}", request.getEmail(), request.getRole());
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
 
-    // [Disha Gujar] : Authenticates user credentials and returns access/refresh tokens.
+    /**
+     * Authenticates user credentials and returns access and refresh tokens.
+     * 
+     * @param request the login request containing email and password
+     * @return the authentication response with tokens
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Validated @RequestBody LoginRequest request) {
         log.info("Login request received for email: {}", request.getEmail());
         return ResponseEntity.ok(authService.login(request));
     }
 
-    // [Disha Gujar] : Generates a new access token using a valid refresh token.
+    /**
+     * Generates a new access token using a valid refresh token.
+     * 
+     * @param request the refresh token request
+     * @return the authentication response with a new access token
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refreshToken(@Validated @RequestBody RefreshTokenRequest request) {
         log.info("Refresh token request received");
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 
-    // [Disha Gujar] : Initiates the password recovery process by sending an OTP.
+    /**
+     * Initiates the password recovery process by sending an OTP to the user's email.
+     * 
+     * @param request the forgot password request containing the email
+     * @return a success message
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@Validated @RequestBody ForgotPasswordRequest request) {
         log.info("Forgot password request received for email: {}", request.getEmail());
@@ -74,7 +105,14 @@ public class AuthController {
         return ResponseEntity.ok("OTP sent successfully to your email");
     }
 
-    // [Disha Gujar] : Resets the user password after verifying the OTP.
+    /**
+     * Resets the user's password after verifying the provided OTP.
+     * 
+     * @param request the reset password request containing email, OTP, and new password
+     * @return a success message
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@Validated @RequestBody ResetPasswordRequest request) {
         log.info("Reset password request received for email: {}", request.getEmail());
@@ -82,15 +120,36 @@ public class AuthController {
         return ResponseEntity.ok("Password reset successfully");
     }
 
-    // [Disha Gujar] : Validates a JWT token — used by the API Gateway for auth-checks.
+    /**
+     * Validates a JWT token. This endpoint is primarily used by the API Gateway.
+     * 
+     * @param authHeader the Authorization header containing the JWT token
+     * @return the token validation response
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/validate")
     public ResponseEntity<TokenValidationResponse> validateToken(
             @RequestHeader("Authorization") String authHeader) {
         log.info("Token validation request received");
-        return ResponseEntity.ok(authService.validateToken(authHeader));
+        try {
+            return ResponseEntity.ok(authService.validateToken(authHeader));
+        } catch (Exception ex) {
+            log.warn("Token validation failed in controller: {}", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
-    // [Disha Gujar] : Redirects to Google OAuth2 login with session-stored role selection.
+    /**
+     * Redirects the user to the Google OAuth2 authorization page with a pre-selected role.
+     * 
+     * @param roleParam the role selected by the user (CANDIDATE or RECRUITER)
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @throws IOException if an I/O error occurs during redirection
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/oauth2/authorize/google")
     public void authorizeGoogle(
             @RequestParam("role") String roleParam,

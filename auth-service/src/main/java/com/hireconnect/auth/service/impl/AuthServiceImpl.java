@@ -28,12 +28,18 @@ import com.hireconnect.auth.repository.AuthRepository;
 import com.hireconnect.auth.repository.PasswordResetOtpRepository;
 import com.hireconnect.auth.security.JwtService;
 import com.hireconnect.auth.service.AuthService;
+import com.hireconnect.auth.service.BloomFilterService;
+import com.hireconnect.auth.service.OtpService;
 import com.hireconnect.auth.service.RefreshTokenService;
 
 import lombok.RequiredArgsConstructor;
 
-// [Disha Gujar] : Service implementation for core authentication and security operations.
-// Handles user registration, JWT-based login, token validation, and secure password recovery.
+/**
+ * Implementation of the AuthService.
+ * Handles user registration, authentication, token management, and password recovery.
+ * Integrates with Kafka for sending notifications.
+ * @author Disha Gujar
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -45,26 +51,45 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final PasswordResetOtpRepository passwordResetOtpRepository;
-//    private final NotificationServiceClient notificationServiceClient;
     private final NotificationEventProducer notificationEventProducer;
+    private final BloomFilterService bloomFilterService;
+    private final OtpService otpService;
 
     @Value("${auth.reset-otp-expiration-minutes}")
     private long resetOtpExpirationMinutes;
 
-    // [Disha Gujar] : Registers a new user (LOCAL provider) and generates initial access/refresh tokens.
+    @Value("${auth.admin-email}")
+    private String adminEmail;
+
     @Override
     public AuthResponse register(RegisterRequest request) {
         log.info("Registration started for email: {}, role: {}", request.getEmail(), request.getRole());
 
-        if (authRepository.existsByEmail(request.getEmail())) {
-            log.warn("Registration failed because email is already registered: {}", request.getEmail());
-            throw new RuntimeException("Email is already registered");
+        // Bloom Filter Check (Fast Layer)
+        if (bloomFilterService.mightContainEmail(request.getEmail())) {
+            log.info("Email possibly exists in Bloom Filter, performing DB check for: {}", request.getEmail());
+            // Double check with DB
+            if (authRepository.existsByEmail(request.getEmail())) {
+                log.warn("Registration failed because email is already registered: {}", request.getEmail());
+                throw new RuntimeException("Email is already registered");
+            }
+        }
+
+        // [Admin Identity Guard] — If the registering email matches the designated
+        // admin email, forcefully assign ROLE_ADMIN regardless of the submitted role.
+        // This ensures only one Super Admin can exist on the platform.
+        Role assignedRole = request.getEmail().equalsIgnoreCase(adminEmail)
+                ? Role.ADMIN
+                : request.getRole();
+
+        if (assignedRole == Role.ADMIN) {
+            log.info("Admin identity detected for email: {}. Assigning ROLE_ADMIN.", request.getEmail());
         }
 
         UserCredential user = UserCredential.builder()
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(assignedRole)
                 .provider(AuthProvider.LOCAL)
                 .isActive(true)
                 .createdAt(LocalDateTime.now())
@@ -73,6 +98,9 @@ public class AuthServiceImpl implements AuthService {
         UserCredential savedUser = authRepository.save(user);
         log.info("User registered successfully with userId: {}, email: {}, role: {}",
                 savedUser.getUserId(), savedUser.getEmail(), savedUser.getRole());
+
+        // Update Bloom Filter after successful registration
+        bloomFilterService.addEmail(savedUser.getEmail());
 
         String accessToken = jwtService.generateToken(savedUser);
         RefreshToken refreshToken = refreshTokenService.createOrUpdateRefreshToken(savedUser);
@@ -87,7 +115,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    // [Disha Gujar] : Validates user credentials and issues fresh JWT and Refresh tokens upon success.
     @Override
     public AuthResponse login(LoginRequest request) {
         log.info("Login started for email: {}", request.getEmail());
@@ -126,7 +153,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    // [Disha Gujar] : Exchanges a valid refresh token for a new access token to maintain session continuity.
     @Override
     public AuthResponse refreshToken(RefreshTokenRequest request) {
         log.info("Refresh token flow started");
@@ -155,7 +181,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    // [Disha Gujar] : Generates a secure OTP for password recovery and dispatches it via the Notification Service.
     @Override
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
@@ -168,20 +193,21 @@ public class AuthServiceImpl implements AuthService {
                 });
 
         passwordResetOtpRepository.deleteByEmail(user.getEmail());
-        log.info("Existing OTP entries deleted for email: {}", user.getEmail());
+        log.info("MYSQL CLEANUP: Old OTP metadata removed for {}", user.getEmail());
 
-        String otp = String.valueOf((int) ((Math.random() * 900000) + 100000));
+        // 1. GENERATE & STORE IN REDIS (New fast path)
+        String otp = otpService.generateAndStoreOtp(user.getEmail());
 
+        // 2. BACKUP STORAGE (Optional: keeping MySQL record for audit trail if desired)
         PasswordResetOtp passwordResetOtp = PasswordResetOtp.builder()
                 .email(user.getEmail())
                 .otp(otp)
                 .expiryTime(LocalDateTime.now().plusMinutes(resetOtpExpirationMinutes))
                 .used(false)
                 .build();
-
         passwordResetOtpRepository.save(passwordResetOtp);
-        log.info("New password reset OTP generated and saved for userId: {}, email: {}",
-                user.getUserId(), user.getEmail());
+        
+        log.info("REDIS & MYSQL: New password reset OTP generated for userId: {}", user.getUserId());
 
         String message =
                 "Dear User,\n\n"
@@ -193,20 +219,6 @@ public class AuthServiceImpl implements AuthService {
                 + "Regards,\n"
                 + "Support Team\n"
                 + "HireConnect";
-
-//        notificationServiceClient.createNotification(
-//                String.valueOf(user.getUserId()),
-//                user.getEmail(),
-//                user.getRole().name(),
-//                NotificationCreateRequestDto.builder()
-//                        .recipientUserId(user.getUserId())
-//                        .recipientEmail(user.getEmail())
-//                        .title("Password Reset OTP")
-//                        .message(message)
-//                        .type(NotificationType.SYSTEM)
-//                        .sendEmail(true)
-//                        .build()
-//        );
         
         NotificationEvent event = NotificationEvent.builder()
                 .recipientUserId(user.getUserId())
@@ -223,7 +235,6 @@ public class AuthServiceImpl implements AuthService {
                 user.getUserId(), user.getEmail());
     }
 
-    // [Disha Gujar] : Finalizes the password reset process by verifying the OTP and updating the user's password hash.
     @Override
     @Transactional
     public void resetPassword(ResetPasswordRequest request) {
@@ -235,47 +246,63 @@ public class AuthServiceImpl implements AuthService {
                     return new RuntimeException("No account found with this email");
                 });
 
-        PasswordResetOtp passwordResetOtp = passwordResetOtpRepository
+        // 1. FAST PATH: Check Redis first
+        boolean isValid = otpService.validateOtp(request.getEmail(), request.getOtp());
+        
+        if (!isValid) {
+            log.warn("VERIFICATION FAILED: OTP either expired in Redis or is incorrect for {}", request.getEmail());
+            // Fallback check in MySQL to ensure we don't break existing tokens during migration
+            PasswordResetOtp backupOtp = passwordResetOtpRepository
                 .findTopByEmailAndOtpAndUsedFalseOrderByIdDesc(request.getEmail(), request.getOtp())
-                .orElseThrow(() -> {
-                    log.warn("Reset password failed due to invalid OTP for email: {}", request.getEmail());
-                    return new RuntimeException("Invalid OTP");
-                });
+                .orElseThrow(() -> new RuntimeException("Invalid OTP (Verified via Redis & DB)"));
 
-        if (passwordResetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
-            log.warn("Reset password failed because OTP expired for email: {}", request.getEmail());
-            throw new RuntimeException("OTP has expired");
+            if (backupOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+                log.warn("EXPIRED: Backup OTP in MySQL has also expired");
+                throw new RuntimeException("OTP has expired");
+            }
+            log.info("FALLBACK SUCCESS: Validated via MySQL backup");
+        } else {
+            log.info("REDIS HIT: OTP validated successfully for {}", request.getEmail());
         }
 
+        // 2. APPLY PASSWORD CHANGE
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         authRepository.save(user);
 
-        passwordResetOtp.setUsed(true);
-        passwordResetOtpRepository.save(passwordResetOtp);
+        // 3. CLEANUP
+        otpService.deleteOtp(request.getEmail());
+        passwordResetOtpRepository.deleteByEmail(request.getEmail());
 
         log.info("Password reset successful for userId: {}, email: {}", user.getUserId(), user.getEmail());
     }
 
-    // [Disha Gujar] : Decodes and validates a JWT token, returning user details for gateway authorization checks.
     @Override
     public TokenValidationResponse validateToken(String token) {
         log.info("Token validation started");
 
+        if (token == null || token.isBlank()) {
+            log.warn("Token validation failed because token is missing");
+                        return TokenValidationResponse.builder()
+                    .valid(false)
+                    .message("Token is missing")
+                    .build();
+
+        }
+
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
         try {
-            if (token == null || token.isBlank()) {
-                log.warn("Token validation failed because token is missing");
-                throw new RuntimeException("Token is missing");
-            }
-
-            if (token.startsWith("Bearer ")) {
-                token = token.substring(7);
-            }
-
             boolean valid = jwtService.isTokenValid(token);
 
             if (!valid) {
                 log.warn("Token validation failed because token is invalid or expired");
-                throw new RuntimeException("Invalid or expired token");
+                return TokenValidationResponse.builder()
+                        .valid(false)
+                        .message("Invalid or expired token")
+                        .build();
+
             }
 
             Long userId = jwtService.extractUserId(token);
@@ -292,10 +319,10 @@ public class AuthServiceImpl implements AuthService {
                     .message("Token is valid")
                     .build();
         } catch (Exception e) {
-            log.warn("Token validation failed: {}", e.getMessage());
+            log.error("Token validation error: {}", e.getMessage());
             return TokenValidationResponse.builder()
                     .valid(false)
-                    .message("Invalid or expired token")
+                    .message("Token validation failed: " + e.getMessage())
                     .build();
         }
     }

@@ -7,6 +7,11 @@ import com.hireconnect.applicationservice.enums.ApplicationStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing ApplicationResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

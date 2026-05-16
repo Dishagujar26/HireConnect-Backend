@@ -17,6 +17,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+/**
+ * Domain entity or core component representing TrustedHeaderAuthenticationFilter.
+ *
+ * @author Disha Gujar
+ */
 
 @Component
 public class TrustedHeaderAuthenticationFilter extends OncePerRequestFilter {

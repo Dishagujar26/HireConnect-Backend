@@ -21,14 +21,18 @@ import com.hireconnect.profileservice.dto.response.ProfileResponseDto;
 import com.hireconnect.profileservice.entity.Resume;
 import com.hireconnect.profileservice.security.AuthenticatedUser;
 import com.hireconnect.profileservice.service.ProfileService;
+import com.hireconnect.profileservice.service.ResumeParserService;
+import com.hireconnect.profileservice.dto.ParsedResumeDto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// [Disha Gujar] : REST controller managing candidate and recruiter profile operations under /api/profiles.
-// Handles profile creation, retrieval, and updates; resume file upload and download for candidates;
-// recruiter-authorized resume access by job application; and internal candidate preview endpoints.
+/**
+ * REST controller for managing candidate and recruiter profiles.
+ * Provides endpoints for profile creation, retrieval, updates, and resume management.
+ * @author Disha Gujar
+ */
 @RestController
 @RequestMapping("/api/profiles")
 @RequiredArgsConstructor
@@ -36,8 +40,17 @@ import lombok.extern.slf4j.Slf4j;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ResumeParserService resumeParserService;
 
-    // [Disha Gujar] : Endpoint to create a new user profile (Candidate or Recruiter).
+    /**
+     * Creates a new user profile.
+     * 
+     * @param user the authenticated user
+     * @param requestDto the profile creation request data
+     * @return the created ProfileResponseDto
+     
+ * @author Disha Gujar
+ */
     @PostMapping
     public ResponseEntity<ProfileResponseDto> createProfile(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -55,7 +68,14 @@ public class ProfileController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // [Disha Gujar] : Retrieves the authenticated user's profile details.
+    /**
+     * Retrieves the profile of the authenticated user.
+     * 
+     * @param user the authenticated user
+     * @return the ProfileResponseDto
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/me")
     public ResponseEntity<ProfileResponseDto> getMyProfile(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -68,7 +88,15 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
-    // [Disha Gujar] : Updates the authenticated user's profile details.
+    /**
+     * Updates the profile of the authenticated user.
+     * 
+     * @param user the authenticated user
+     * @param requestDto the profile update request data
+     * @return the updated ProfileResponseDto
+     
+ * @author Disha Gujar
+ */
     @PutMapping("/me")
     public ResponseEntity<ProfileResponseDto> updateMyProfile(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -84,6 +112,11 @@ public class ProfileController {
         log.info("Profile updated successfully for userId={}", user.getUserId());
         return ResponseEntity.ok(response);
     }
+    /**
+     * Retrieves candidate profile preview.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/candidates/{userId}/preview")
     public ResponseEntity<CandidateProfilePreviewDto> getCandidateProfilePreview(
@@ -97,7 +130,15 @@ public class ProfileController {
         return ResponseEntity.ok(response);
     }
 
-    // [Disha Gujar] : Uploads a PDF resume for the authenticated candidate.
+    /**
+     * Uploads a resume for the authenticated candidate.
+     * 
+     * @param file the multipart file representing the resume
+     * @param user the authenticated candidate
+     * @return a success message or the resume URL
+     
+ * @author Disha Gujar
+ */
     @PostMapping("/resume/upload")
     public ResponseEntity<String> uploadResume(
             @RequestParam("file") MultipartFile file,
@@ -107,7 +148,14 @@ public class ProfileController {
         return ResponseEntity.ok(profileService.uploadResume(user, file));
     }
 
-    // [Disha Gujar] : Allows a candidate to download their own uploaded resume.
+    /**
+     * Allows a candidate to download their own resume.
+     * 
+     * @param user the authenticated candidate
+     * @return the resume file data
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/resume/my")
     public ResponseEntity<byte[]> downloadMyResume(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -123,7 +171,16 @@ public class ProfileController {
                 .body(resume.getFileData());
     }
 
-    // [Disha Gujar] : Allows a recruiter to download a candidate's resume for a job application they own.
+    /**
+     * Allows a recruiter to download a candidate's resume if they have applied for a job owned by the recruiter.
+     * 
+     * @param candidateId the ID of the candidate
+     * @param jobId the ID of the job
+     * @param user the authenticated recruiter
+     * @return the resume file data
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/resume/recruiter/{candidateId}/{jobId}")
     public ResponseEntity<byte[]> downloadResumeForRecruiter(
             @PathVariable Long candidateId,
@@ -141,4 +198,54 @@ public class ProfileController {
                 .contentType(MediaType.parseMediaType(resume.getContentType()))
                 .body(resume.getFileData());
     }
+
+    /**
+     * Allows a recruiter to view the full comprehensive profile of a candidate who
+     * has applied to one of their jobs.
+     *
+     * @param candidateId the candidate's userId
+     * @param jobId       the job the candidate applied for (used for authorization)
+     * @param user        the authenticated recruiter
+     * @return full candidate profile DTO
+     *
+     * @author Disha Gujar
+     */
+    @GetMapping("/recruiter/candidates/{candidateId}/full")
+    public ResponseEntity<com.hireconnect.profileservice.dto.response.CandidateFullProfileDto> getCandidateFullProfile(
+            @PathVariable Long candidateId,
+            @org.springframework.web.bind.annotation.RequestParam Long jobId,
+            @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        log.info("Received full candidate profile request | recruiterId={} | candidateId={} | jobId={}",
+                user.getUserId(), candidateId, jobId);
+
+        com.hireconnect.profileservice.dto.response.CandidateFullProfileDto response =
+                profileService.getCandidateFullProfile(user, candidateId, jobId);
+
+        log.info("Full candidate profile returned | recruiterId={} | candidateId={}", user.getUserId(), candidateId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Parses the candidate's uploaded resume to extract skills.
+     * 
+     * @param user the authenticated candidate
+     * @return the extracted skills
+     */
+    @PostMapping("/resume/parse")
+    public ResponseEntity<ParsedResumeDto> parseMyResume(
+            @AuthenticationPrincipal AuthenticatedUser user
+    ) {
+        log.info("Received parse resume request for userId={}", user.getUserId());
+        
+        Resume resume = profileService.getMyResume(user);
+        if (resume == null || resume.getFileData() == null) {
+            throw new RuntimeException("No resume found to parse.");
+        }
+        
+        ParsedResumeDto response = resumeParserService.parsePdfResume(resume.getFileData());
+        
+        return ResponseEntity.ok(response);
+    }
 }
+

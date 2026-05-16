@@ -4,6 +4,11 @@ import com.hireconnect.applicationservice.enums.Role;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+/**
+ * Domain entity or core component representing AuthenticatedUser.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @AllArgsConstructor

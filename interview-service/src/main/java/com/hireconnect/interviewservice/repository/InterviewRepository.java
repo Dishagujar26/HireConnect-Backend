@@ -7,6 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hireconnect.interviewservice.entity.Interview;
 import com.hireconnect.interviewservice.enums.InterviewStatus;
+/**
+ * Repository interface for database operations related to Interview entities.
+ *
+ * @author Disha Gujar
+ */
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 

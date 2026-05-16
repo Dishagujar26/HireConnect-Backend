@@ -1,54 +1,11 @@
-server:
-  port: 8083
-
 spring:
   application:
     name: job-service
-
-  datasource:
-    url: jdbc:mysql://localhost:3306/hireconnect_job_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+  config:
+    import: "optional:configserver:http://localhost:8888"
 
 eureka:
   instance:
+    prefer-ip-address: true
     hostname: localhost
-    prefer-ip-address: false
-  client:
-    register-with-eureka: true
-    fetch-registry: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
-jwt:
-  secret: 12345678901234567890123456789012
-  expiration: 86400000
-
-logging:
-  file:
-    path: ../logs/job-service
-  level:
-    root: INFO
-    com.hireconnect.jobservice: DEBUG
-    org.springframework.security: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-spring.cloud.compatibility-verifier.enabled: false
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
+    ip-address: localhost

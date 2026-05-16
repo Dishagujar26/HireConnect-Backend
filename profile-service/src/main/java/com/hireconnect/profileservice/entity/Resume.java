@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+/**
+ * Domain entity or core component representing Resume.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "resumes")
@@ -40,6 +45,11 @@ public class Resume {
     @OneToOne
     @JoinColumn(name = "profile_id", nullable = false, unique = true)
     private Profile profile;
+    /**
+     * On upload.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onUpload() {

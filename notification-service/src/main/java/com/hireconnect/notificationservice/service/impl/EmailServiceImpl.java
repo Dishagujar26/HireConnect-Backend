@@ -10,6 +10,11 @@ import com.hireconnect.notificationservice.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Implementation of the EmailService.
+ * Handles the logic for sending simple mail messages using JavaMailSender.
+ * @author Disha Gujar
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
@@ -18,6 +23,15 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender mailSender;
 
+    /**
+     * Sends a simple email message.
+     * 
+     * @param to the recipient email address
+     * @param subject the email subject
+     * @param body the email body content
+     
+ * @author Disha Gujar
+ */
     @Override
     public void sendEmail(String to, String subject, String body) {
         logger.info("Sending email to={}, subject={}", to, subject);

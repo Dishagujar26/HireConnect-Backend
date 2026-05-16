@@ -8,6 +8,11 @@ import org.springframework.stereotype.Service;
 import com.hireconnect.auth.event.NotificationEvent;
 
 import lombok.RequiredArgsConstructor;
+/**
+ * Domain entity or core component representing NotificationEventProducer.
+ *
+ * @author Disha Gujar
+ */
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +23,11 @@ public class NotificationEventProducer {
     private final KafkaTemplate<String, NotificationEvent> kafkaTemplate;
 
     private final String topic = "hireconnect-notifications";
+    /**
+     * Send notification.
+     *
+     * @author Disha Gujar
+     */
 
     public void sendNotification(NotificationEvent event) {
         logger.info("Publishing notification event for userId={}, type={}",

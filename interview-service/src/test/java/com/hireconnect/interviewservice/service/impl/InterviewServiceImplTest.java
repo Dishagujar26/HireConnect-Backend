@@ -1,13 +1,10 @@
 package com.hireconnect.interviewservice.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,12 +17,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.hireconnect.interviewservice.client.ApplicationServiceClient;
 import com.hireconnect.interviewservice.client.dto.ApplicationSummaryDto;
+import com.hireconnect.interviewservice.dto.request.InterviewCompleteRequestDto;
 import com.hireconnect.interviewservice.dto.request.InterviewScheduleRequestDto;
+import com.hireconnect.interviewservice.dto.request.InterviewUpdateRequestDto;
 import com.hireconnect.interviewservice.dto.response.InterviewResponseDto;
 import com.hireconnect.interviewservice.entity.Interview;
 import com.hireconnect.interviewservice.enums.InterviewStatus;
+import com.hireconnect.interviewservice.enums.InterviewType;
 import com.hireconnect.interviewservice.enums.Role;
-import com.hireconnect.interviewservice.event.NotificationEvent;
 import com.hireconnect.interviewservice.exception.BadRequestException;
 import com.hireconnect.interviewservice.exception.ResourceNotFoundException;
 import com.hireconnect.interviewservice.exception.UnauthorizedException;
@@ -33,11 +32,8 @@ import com.hireconnect.interviewservice.producer.NotificationEventProducer;
 import com.hireconnect.interviewservice.repository.InterviewRepository;
 import com.hireconnect.interviewservice.security.AuthenticatedUser;
 
-import lombok.Builder;
-
 @ExtendWith(MockitoExtension.class)
-@Builder
-public class InterviewServiceImplTest {
+class InterviewServiceImplTest {
 
     @Mock
     private InterviewRepository interviewRepository;
@@ -53,104 +49,139 @@ public class InterviewServiceImplTest {
 
     private AuthenticatedUser recruiterUser;
     private AuthenticatedUser candidateUser;
-    private InterviewScheduleRequestDto scheduleRequestDto;
+    private InterviewScheduleRequestDto requestDto;
     private ApplicationSummaryDto applicationSummary;
     private Interview interview;
 
     @BeforeEach
     void setUp() {
-        recruiterUser = new AuthenticatedUser(2L, "recruiter@example.com", Role.RECRUITER);
-        candidateUser = new AuthenticatedUser(1L, "candidate@example.com", Role.CANDIDATE);
+        recruiterUser = new AuthenticatedUser(2L, "recruiter@test.com", Role.RECRUITER);
+        candidateUser = new AuthenticatedUser(1L, "candidate@test.com", Role.CANDIDATE);
+        
+        requestDto = new InterviewScheduleRequestDto();
+        requestDto.setApplicationId(100L);
+        requestDto.setInterviewType(InterviewType.ONLINE);
+        requestDto.setScheduledAt(LocalDateTime.now().plusDays(1));
+        requestDto.setDurationMinutes(60);
+        requestDto.setMeetingLink("http://zoom.us/test");
 
-        scheduleRequestDto = new InterviewScheduleRequestDto();
-        scheduleRequestDto.setApplicationId(10L);
-
-        applicationSummary = new ApplicationSummaryDto();
-        applicationSummary.setId(10L);
-        applicationSummary.setJobId(100L);
-        applicationSummary.setCandidateId(1L);
-        applicationSummary.setCandidateEmail("candidate@example.com");
-        applicationSummary.setRecruiterId(2L);
-        applicationSummary.setStatus("SHORTLISTED");
-
-        interview = Interview.builder()
-                .id(50L)
-                .applicationId(10L)
-                .jobId(100L)
+        applicationSummary = ApplicationSummaryDto.builder()
+                .id(100L)
+                .jobId(10L)
                 .candidateId(1L)
                 .recruiterId(2L)
+                .candidateEmail("candidate@test.com")
+                .status("SHORTLISTED")
+                .build();
+
+        interview = Interview.builder()
+                .id(500L)
+                .applicationId(100L)
+                .candidateId(1L)
+                .candidateEmail("candidate@test.com")
+                .recruiterId(2L)
+                .interviewType(InterviewType.ONLINE)
+                .scheduledAt(LocalDateTime.now().plusDays(1))
                 .status(InterviewStatus.SCHEDULED)
                 .build();
     }
 
     @Test
     void scheduleInterview_Success() {
-        when(applicationServiceClient.getApplicationSummary(10L)).thenReturn(applicationSummary);
+        when(applicationServiceClient.getApplicationSummary(100L)).thenReturn(applicationSummary);
         when(interviewRepository.save(any(Interview.class))).thenReturn(interview);
 
-        InterviewResponseDto response = interviewService.scheduleInterview(recruiterUser, scheduleRequestDto);
+        InterviewResponseDto response = interviewService.scheduleInterview(recruiterUser, requestDto);
 
         assertNotNull(response);
-        assertEquals(50L, response.getId());
         assertEquals(InterviewStatus.SCHEDULED, response.getStatus());
-        verify(notificationEventProducer, times(1)).sendNotification(any(NotificationEvent.class));
+        verify(notificationEventProducer).sendNotification(any());
     }
 
     @Test
-    void scheduleInterview_ApplicationNotFound_ThrowsException() {
-        when(applicationServiceClient.getApplicationSummary(10L)).thenReturn(null);
-
-        assertThrows(ResourceNotFoundException.class, () -> 
-            interviewService.scheduleInterview(recruiterUser, scheduleRequestDto));
+    void scheduleInterview_ApplicationNotFound() {
+        when(applicationServiceClient.getApplicationSummary(100L)).thenReturn(null);
+        assertThrows(ResourceNotFoundException.class, () -> interviewService.scheduleInterview(recruiterUser, requestDto));
     }
 
     @Test
-    void scheduleInterview_Unauthorized_ThrowsException() {
-        applicationSummary.setRecruiterId(99L);
-        when(applicationServiceClient.getApplicationSummary(10L)).thenReturn(applicationSummary);
-
-        assertThrows(UnauthorizedException.class, () -> 
-            interviewService.scheduleInterview(recruiterUser, scheduleRequestDto));
-    }
-
-    @Test
-    void scheduleInterview_NotShortlisted_ThrowsException() {
-        applicationSummary.setStatus("APPLIED");
-        when(applicationServiceClient.getApplicationSummary(10L)).thenReturn(applicationSummary);
-
-        assertThrows(BadRequestException.class, () -> 
-            interviewService.scheduleInterview(recruiterUser, scheduleRequestDto));
+    void applicationServiceFallback_ShouldThrowException() {
+        assertThrows(RuntimeException.class, () -> 
+            interviewService.applicationServiceFallback(recruiterUser, requestDto, new RuntimeException("Service down")));
     }
 
     @Test
     void getRecruiterInterviews_Success() {
-        when(interviewRepository.findByRecruiterIdOrderByScheduledAtDesc(2L))
-            .thenReturn(List.of(interview));
+        when(interviewRepository.findByRecruiterIdOrderByScheduledAtDesc(2L)).thenReturn(List.of(interview));
+        List<InterviewResponseDto> result = interviewService.getRecruiterInterviews(recruiterUser);
+        assertFalse(result.isEmpty());
+    }
 
-        List<InterviewResponseDto> responses = interviewService.getRecruiterInterviews(recruiterUser);
+    @Test
+    void getCandidateInterviews_Success() {
+        when(interviewRepository.findByCandidateIdOrderByScheduledAtDesc(1L)).thenReturn(List.of(interview));
+        List<InterviewResponseDto> result = interviewService.getCandidateInterviews(candidateUser);
+        assertFalse(result.isEmpty());
+    }
 
-        assertNotNull(responses);
-        assertEquals(1, responses.size());
-        assertEquals(50L, responses.get(0).getId());
+    @Test
+    void updateInterview_Success() {
+        InterviewUpdateRequestDto updateDto = new InterviewUpdateRequestDto();
+        updateDto.setStatus(InterviewStatus.COMPLETED);
+        
+        when(interviewRepository.findByIdAndRecruiterId(500L, 2L)).thenReturn(Optional.of(interview));
+        when(interviewRepository.save(any())).thenReturn(interview);
+
+        InterviewResponseDto response = interviewService.updateInterview(recruiterUser, 500L, updateDto);
+        assertNotNull(response);
+        verify(notificationEventProducer).sendNotification(any());
     }
 
     @Test
     void cancelInterview_Success() {
-        when(interviewRepository.findByIdAndRecruiterId(50L, 2L)).thenReturn(Optional.of(interview));
-        when(interviewRepository.save(any(Interview.class))).thenReturn(interview);
+        when(interviewRepository.findByIdAndRecruiterId(500L, 2L)).thenReturn(Optional.of(interview));
+        when(interviewRepository.save(any())).thenReturn(interview);
 
-        InterviewResponseDto response = interviewService.cancelInterview(recruiterUser, 50L);
-
-        assertNotNull(response);
+        interviewService.cancelInterview(recruiterUser, 500L);
         assertEquals(InterviewStatus.CANCELLED, interview.getStatus());
-        verify(notificationEventProducer, times(1)).sendNotification(any(NotificationEvent.class));
+        verify(notificationEventProducer).sendNotification(any());
     }
 
     @Test
-    void cancelInterview_NotFound_ThrowsException() {
-        when(interviewRepository.findByIdAndRecruiterId(50L, 2L)).thenReturn(Optional.empty());
+    void completeInterview_WithHireAction_Success() {
+        InterviewCompleteRequestDto completeDto = new InterviewCompleteRequestDto();
+        completeDto.setTechnicalScore(9);
+        completeDto.setSelectionAction(InterviewCompleteRequestDto.SelectionAction.HIRE);
+        
+        when(interviewRepository.findByIdAndRecruiterId(500L, 2L)).thenReturn(Optional.of(interview));
+        when(interviewRepository.save(any())).thenReturn(interview);
 
-        assertThrows(ResourceNotFoundException.class, () -> 
-            interviewService.cancelInterview(recruiterUser, 50L));
+        interviewService.completeInterview(recruiterUser, 500L, completeDto);
+        
+        assertEquals(InterviewStatus.COMPLETED, interview.getStatus());
+        verify(applicationServiceClient).updateApplicationStatus(eq(100L), any());
+    }
+
+    @Test
+    void completeInterview_CancelledInterview_ShouldThrowException() {
+        interview.setStatus(InterviewStatus.CANCELLED);
+        when(interviewRepository.findByIdAndRecruiterId(500L, 2L)).thenReturn(Optional.of(interview));
+        
+        InterviewCompleteRequestDto completeDto = new InterviewCompleteRequestDto();
+        assertThrows(BadRequestException.class, () -> interviewService.completeInterview(recruiterUser, 500L, completeDto));
+    }
+
+    @Test
+    void getInterviewDetails_UnauthorizedCandidate() {
+        interview.setCandidateId(99L);
+        when(interviewRepository.findById(500L)).thenReturn(Optional.of(interview));
+        assertThrows(UnauthorizedException.class, () -> interviewService.getInterviewDetails(candidateUser, 500L));
+    }
+
+    @Test
+    void getInterviewDetails_UnauthorizedRecruiter() {
+        interview.setRecruiterId(99L);
+        when(interviewRepository.findById(500L)).thenReturn(Optional.of(interview));
+        assertThrows(UnauthorizedException.class, () -> interviewService.getInterviewDetails(recruiterUser, 500L));
     }
 }

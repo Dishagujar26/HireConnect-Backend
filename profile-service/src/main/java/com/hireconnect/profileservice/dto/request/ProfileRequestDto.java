@@ -6,7 +6,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+/**
+ * Data transfer object representing ProfileRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -23,6 +30,16 @@ public class ProfileRequestDto {
     private String about;
     private String profilePictureUrl;
 
+    // ─── Extended Candidate Fields ────────────────────────────────────────────
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String nationality;
+    private Integer noticePeriodDays;
+    private Long expectedSalary;
+    private Long currentSalary;
+    private String preferredWorkMode;
+    private BigDecimal totalExperienceYears;
+
     private List<SkillRequestDto> skills;
     private List<EducationRequestDto> educations;
     private List<ExperienceRequestDto> experiences;
@@ -30,3 +47,4 @@ public class ProfileRequestDto {
     private ResumeRequestDto resume;
     private RecruiterDetailRequestDto recruiterDetail;
 }
+

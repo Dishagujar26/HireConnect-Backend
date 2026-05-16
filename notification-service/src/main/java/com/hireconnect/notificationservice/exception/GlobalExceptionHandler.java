@@ -11,29 +11,54 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+/**
+ * Domain entity or core component representing GlobalExceptionHandler.
+ *
+ * @author Disha Gujar
+ */
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    /**
+     * Handle not found.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleNotFound(ResourceNotFoundException ex) {
         logger.warn("Resource not found: {}", ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+    /**
+     * Handle bad request.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequest(BadRequestException ex) {
         logger.warn("Bad request: {}", ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
+    /**
+     * Handle unauthorized.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedException ex) {
         logger.warn("Unauthorized action: {}", ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
     }
+    /**
+     * Handle validation.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
@@ -44,6 +69,11 @@ public class GlobalExceptionHandler {
         logger.warn("Validation failed: {}", message);
         return buildResponse(HttpStatus.BAD_REQUEST, message);
     }
+    /**
+     * Handle generic.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {

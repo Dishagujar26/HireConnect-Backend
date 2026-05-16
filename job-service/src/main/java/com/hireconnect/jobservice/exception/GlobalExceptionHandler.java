@@ -14,22 +14,42 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
 
 import jakarta.servlet.http.HttpServletRequest;
+/**
+ * Domain entity or core component representing GlobalExceptionHandler.
+ *
+ * @author Disha Gujar
+ */
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    /**
+     * Handle job not found.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(JobNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleJobNotFound(JobNotFoundException ex, HttpServletRequest request) {
         log.warn("Job not found exception at path={}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request.getRequestURI());
     }
+    /**
+     * Handle unauthorized.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(UnauthorizedJobAccessException.class)
     public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedJobAccessException ex, HttpServletRequest request) {
         log.warn("Unauthorized access at path={}: {}", request.getRequestURI(), ex.getMessage());
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), request.getRequestURI());
     }
+    /**
+     * Handle validation.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -48,6 +68,11 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
+    /**
+     * Handle generic.
+     *
+     * @author Disha Gujar
+     */
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex, HttpServletRequest request) {

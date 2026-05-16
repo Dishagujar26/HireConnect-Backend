@@ -2,6 +2,11 @@ package com.hireconnect.profileservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing Skill.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "skills")

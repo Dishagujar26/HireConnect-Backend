@@ -16,6 +16,11 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Configuration class for Kafka Consumer.
+ * Sets up the ConsumerFactory and KafkaListenerContainerFactory for processing NotificationEvents.
+ * @author Disha Gujar
+ */
 @Configuration
 @EnableKafka
 public class KafkaConsumerConfig {
@@ -23,6 +28,14 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    /**
+     * Configures the Kafka Consumer Factory.
+     * Sets up deserializers for String keys and NotificationEvent JSON values.
+     * 
+     * @return a configured ConsumerFactory
+     
+ * @author Disha Gujar
+ */
     @Bean
     public ConsumerFactory<String, NotificationEvent> consumerFactory() {
     	JsonDeserializer<NotificationEvent> deserializer = new JsonDeserializer<>(NotificationEvent.class);
@@ -40,6 +53,14 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
 
+    /**
+     * Configures the Kafka Listener Container Factory.
+     * This factory is used by @KafkaListener annotations to create the underlying message listener containers.
+     * 
+     * @return a configured ConcurrentKafkaListenerContainerFactory
+     
+ * @author Disha Gujar
+ */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, NotificationEvent> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, NotificationEvent> factory =

@@ -18,9 +18,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// [Disha Gujar] : REST controller managing all job-related operations under /api/jobs.
-// Exposes endpoints for recruiter CRUD, public job listing and search, featured job marking,
-// and internal endpoints (/internal/**) for cross-service ownership, existence, and recruiter-ID lookups.
+/**
+ * REST controller for managing job postings.
+ * Provides endpoints for recruiter-specific CRUD operations, public job search,
+ * and internal inter-service communication.
+ * @author Disha Gujar
+ */
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
@@ -29,7 +32,15 @@ public class JobController {
 
     private final JobService jobService;
 
-    // [Disha Gujar] : Endpoint to create a new job posting by a recruiter.
+    /**
+     * Creates a new job posting for a recruiter.
+     * 
+     * @param user the authenticated recruiter
+     * @param requestDto the job creation details
+     * @return the created JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @PostMapping
     public ResponseEntity<JobResponseDto> createJob(
             @AuthenticationPrincipal AuthenticatedUser user,
@@ -45,7 +56,16 @@ public class JobController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // [Disha Gujar] : Endpoint to update an existing job posting owned by the recruiter.
+    /**
+     * Updates an existing job posting.
+     * 
+     * @param jobId the ID of the job to update
+     * @param user the authenticated recruiter
+     * @param requestDto the updated job details
+     * @return the updated JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @PutMapping("/{jobId}")
     public ResponseEntity<JobResponseDto> updateJob(
             @PathVariable Long jobId,
@@ -63,7 +83,15 @@ public class JobController {
         return ResponseEntity.ok(response);
     }
 
-    // [Disha Gujar] : Endpoint to delete a job posting owned by the recruiter.
+    /**
+     * Deletes a job posting.
+     * 
+     * @param jobId the ID of the job to delete
+     * @param user the authenticated recruiter
+     * @return a success message
+     
+ * @author Disha Gujar
+ */
     @DeleteMapping("/{jobId}")
     public ResponseEntity<String> deleteJob(
             @PathVariable Long jobId,
@@ -75,7 +103,14 @@ public class JobController {
         return ResponseEntity.ok("Job deleted successfully");
     }
 
-    // [Disha Gujar] : Retrieves all job postings created by the currently logged-in recruiter.
+    /**
+     * Retrieves all job postings created by the authenticated recruiter.
+     * 
+     * @param user the authenticated recruiter
+     * @return a list of JobResponseDto
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/recruiter/me")
     public ResponseEntity<List<JobResponseDto>> getMyJobs(
             @AuthenticationPrincipal AuthenticatedUser user
@@ -84,12 +119,23 @@ public class JobController {
         return ResponseEntity.ok(jobService.getMyJobs(user.getUserId(), user.getRole()));
     }
 
-    // [Disha Gujar] : Public endpoint to fetch all available job postings in OPEN status.
+    /**
+     * Fetches all open job postings.
+     * 
+     * @return a list of open jobs
+     
+ * @author Disha Gujar
+ */
     @GetMapping
     public ResponseEntity<List<JobResponseDto>> getAllOpenJobs() {
         log.info("Fetch all open jobs request received");
         return ResponseEntity.ok(jobService.getAllOpenJobs());
     }
+    /**
+     * Retrieves open job by id.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/{jobId}")
     public ResponseEntity<JobResponseDto> getOpenJobById(@PathVariable Long jobId) {
@@ -97,7 +143,19 @@ public class JobController {
         return ResponseEntity.ok(jobService.getOpenJobById(jobId));
     }
 
-    // [Disha Gujar] : Public endpoint to search for open jobs using various filters.
+    /**
+     * Searches for open jobs based on various criteria.
+     * 
+     * @param keyword keyword to search in title/description
+     * @param location location filter
+     * @param jobType type of job (FULL_TIME, PART_TIME, etc.)
+     * @param experienceLevel level of experience required
+     * @param minSalary minimum salary filter
+     * @param maxSalary maximum salary filter
+     * @return a list of matching job postings
+     
+ * @author Disha Gujar
+ */
     @GetMapping("/search")
     public ResponseEntity<List<JobResponseDto>> searchJobs(
             @RequestParam(required = false) String keyword,
@@ -119,18 +177,33 @@ public class JobController {
                 )
         );
     }
+    /**
+     * Does job exist.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/{jobId}/exists")
     public ResponseEntity<Boolean> doesJobExist(@PathVariable Long jobId) {
         log.info("Internal exists check request received for jobId={}", jobId);
         return ResponseEntity.ok(jobService.doesJobExist(jobId));
     }
+    /**
+     * Checks if job open.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/{jobId}/open")
     public ResponseEntity<Boolean> isJobOpen(@PathVariable Long jobId) {
         log.info("Internal open status check request received for jobId={}", jobId);
         return ResponseEntity.ok(jobService.isJobOpen(jobId));
     }
+    /**
+     * Checks if job owned by recruiter.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/{jobId}/recruiter/{recruiterId}/ownership")
     public ResponseEntity<Boolean> isJobOwnedByRecruiter(
@@ -140,12 +213,22 @@ public class JobController {
         log.info("Internal ownership check request received for jobId={} and recruiterId={}", jobId, recruiterId);
         return ResponseEntity.ok(jobService.isJobOwnedByRecruiter(jobId, recruiterId));
     }
+    /**
+     * Retrieves job ids by recruiter.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/recruiter/{recruiterId}/job-ids")
     public ResponseEntity<List<Long>> getJobIdsByRecruiter(@PathVariable Long recruiterId) {
         log.info("Internal recruiter job ids request received for recruiterId={}", recruiterId);
         return ResponseEntity.ok(jobService.getJobIdsByRecruiter(recruiterId));
     }
+    /**
+     * Retrieves recruiter id by job id.
+     *
+     * @author Disha Gujar
+     */
 
     @GetMapping("/internal/{jobId}/recruiter-id")
     public ResponseEntity<Long> getRecruiterIdByJobId(@PathVariable Long jobId) {
@@ -153,15 +236,60 @@ public class JobController {
         return ResponseEntity.ok(jobService.getRecruiterIdByJobId(jobId));
     }
     
-    // [Disha Gujar] : Marks a job as featured (promoted) after successful payment.
+    /**
+     * Marks a job as featured.
+     * 
+     * @param jobId the ID of the job to feature
+     * @param user the authenticated recruiter
+     * @return a success message
+     
+ * @author Disha Gujar
+ */
     @PutMapping("/{jobId}/feature")
     public ResponseEntity<String> markJobAsFeatured(
             @PathVariable Long jobId,
             @AuthenticationPrincipal AuthenticatedUser user
     ) {
         log.info("Feature job request received for jobId={} by recruiterId={}", jobId, user != null ? user.getUserId() : null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("User not authenticated");
+        }
+
         jobService.markAsFeatured(jobId, user.getUserId(), user.getRole());
         log.info("Job marked as featured successfully for jobId={}", jobId);
         return ResponseEntity.ok("Job marked as featured");
+    }
+
+    /**
+     * Retrieves recommended jobs based on candidate skills.
+     * 
+     * @param skills the candidate skills
+     * @param limit the number of jobs to return
+     * @return list of recommended jobs
+     */
+    @GetMapping("/recommended")
+    public ResponseEntity<List<com.hireconnect.jobservice.dto.response.RecommendedJobResponseDto>> getRecommendedJobs(
+            @RequestParam List<String> skills,
+            @RequestParam(defaultValue = "6") int limit
+    ) {
+        log.info("Recommended jobs request received with skills={}", skills);
+        return ResponseEntity.ok(jobService.getRecommendedJobs(skills, limit));
+    }
+
+    /**
+     * Retrieves the match score for a candidate against a job.
+     * 
+     * @param jobId the ID of the job
+     * @param skills the candidate skills
+     * @return the match score dto
+     */
+    @GetMapping("/{jobId}/match-score")
+    public ResponseEntity<com.hireconnect.jobservice.dto.response.MatchScoreResponseDto> getMatchScore(
+            @PathVariable Long jobId,
+            @RequestParam List<String> skills
+    ) {
+        log.info("Match score request received for jobId={} with skills={}", jobId, skills);
+        return ResponseEntity.ok(jobService.computeMatchScore(jobId, skills));
     }
 }

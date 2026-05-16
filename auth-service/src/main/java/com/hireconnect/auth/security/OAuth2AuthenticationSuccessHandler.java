@@ -23,6 +23,11 @@ import com.hireconnect.auth.service.RefreshTokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+/**
+ * Domain entity or core component representing OAuth2AuthenticationSuccessHandler.
+ *
+ * @author Disha Gujar
+ */
 
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -48,6 +53,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         this.passwordEncoder = passwordEncoder;
         this.successRedirectUrl = successRedirectUrl;
     }
+    /**
+     * On authentication success.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public void onAuthenticationSuccess(

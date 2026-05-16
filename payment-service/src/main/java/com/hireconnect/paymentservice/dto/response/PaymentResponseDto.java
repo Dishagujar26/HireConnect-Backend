@@ -8,6 +8,11 @@ import com.hireconnect.paymentservice.enums.PaymentStatus;
 
 import lombok.Builder;
 import lombok.Data;
+/**
+ * Data transfer object representing PaymentResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @Builder

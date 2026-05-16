@@ -6,6 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hireconnect.auth.entity.RefreshToken;
 import com.hireconnect.auth.entity.UserCredential;
+/**
+ * Repository interface for database operations related to RefreshToken entities.
+ *
+ * @author Disha Gujar
+ */
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 

@@ -14,6 +14,11 @@ import com.hireconnect.paymentservice.security.TrustedHeaderAuthenticationFilter
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+/**
+ * Configuration class for SecurityConfig.
+ *
+ * @author Disha Gujar
+ */
 
 @Configuration
 @RequiredArgsConstructor
@@ -22,6 +27,11 @@ public class SecurityConfig {
     private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
     private final TrustedHeaderAuthenticationFilter trustedHeaderAuthenticationFilter;
+    /**
+     * Security filter chain.
+     *
+     * @author Disha Gujar
+     */
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -39,7 +49,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/actuator/**"
+                                "/actuator/**",
+                                "/error"
                         ).permitAll()
                         .requestMatchers("/api/payments/webhook").permitAll()
                         .requestMatchers("/api/payments/**").authenticated()

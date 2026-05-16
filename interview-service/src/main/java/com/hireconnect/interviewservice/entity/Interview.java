@@ -7,6 +7,11 @@ import com.hireconnect.interviewservice.enums.InterviewType;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing Interview.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "interviews")
@@ -55,6 +60,15 @@ public class Interview {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "technical_score")
+    private Integer technicalScore;
+
+    @Column(name = "communication_score")
+    private Integer communicationScore;
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private InterviewStatus status;
@@ -64,6 +78,11 @@ public class Interview {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    /**
+     * On create.
+     *
+     * @author Disha Gujar
+     */
 
     @PrePersist
     public void onCreate() {
@@ -73,6 +92,11 @@ public class Interview {
             this.status = InterviewStatus.SCHEDULED;
         }
     }
+    /**
+     * On update.
+     *
+     * @author Disha Gujar
+     */
 
     @PreUpdate
     public void onUpdate() {

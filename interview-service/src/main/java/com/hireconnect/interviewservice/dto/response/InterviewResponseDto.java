@@ -8,6 +8,11 @@ import com.hireconnect.interviewservice.enums.InterviewType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing InterviewResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter
@@ -25,6 +30,9 @@ public class InterviewResponseDto {
     private String meetingLink;
     private String location;
     private String notes;
+    private Integer technicalScore;
+    private Integer communicationScore;
+    private String feedback;
     private InterviewStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

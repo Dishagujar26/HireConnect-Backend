@@ -3,6 +3,11 @@ package com.hireconnect.auth.dto.response;
 import com.hireconnect.auth.entity.Role;
 import lombok.Builder;
 import lombok.Data;
+/**
+ * Payload object for TokenValidationResponse.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @Builder

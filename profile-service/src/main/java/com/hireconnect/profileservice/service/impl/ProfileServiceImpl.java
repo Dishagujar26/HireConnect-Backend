@@ -8,6 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hireconnect.profileservice.client.ApplicationServiceClient;
 import com.hireconnect.profileservice.client.JobServiceClient;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import com.hireconnect.profileservice.dto.request.ProfileRequestDto;
 import com.hireconnect.profileservice.dto.response.CandidateProfilePreviewDto;
 import com.hireconnect.profileservice.dto.response.ProfileResponseDto;
@@ -15,7 +18,6 @@ import com.hireconnect.profileservice.entity.Profile;
 import com.hireconnect.profileservice.entity.Resume;
 import com.hireconnect.profileservice.entity.Role;
 import com.hireconnect.profileservice.exception.ProfileAlreadyExistsException;
-import com.hireconnect.profileservice.exception.ProfileNotFoundException;
 import com.hireconnect.profileservice.mapper.ProfileMapper;
 import com.hireconnect.profileservice.repository.ProfileRepository;
 import com.hireconnect.profileservice.repository.ResumeRepository;
@@ -25,8 +27,12 @@ import com.hireconnect.profileservice.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-// [Disha Gujar] : Service implementation for user profile and resume management.
-// [Disha Gujar] : Supports profile CRUD, candidate previews, and secure resume upload/download for recruiters.
+/**
+ * Service implementation for user profile and resume management.
+ * Supports profile CRUD, candidate previews, and secure resume upload/download for recruiters.
+ *
+ * @author Disha Gujar
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -39,9 +45,17 @@ public class ProfileServiceImpl implements ProfileService {
     private final JobServiceClient jobServiceClient;
     private final ApplicationServiceClient applicationServiceClient;
 
-    // [Disha Gujar] : PROFILE MANAGEMENT SECTION — Handles core profile data operations.
+    /**
+ * PROFILE MANAGEMENT SECTION — Handles core profile data operations.
+ *
+ * @author Disha Gujar
+ */
 
-    // [Disha Gujar] : Creates a new profile for a candidate or recruiter if it doesn't already exist.
+    /**
+ * Creates a new profile for a candidate or recruiter if it doesn't already exist.
+ *
+ * @author Disha Gujar
+ */
     @Override
     public ProfileResponseDto createProfile(Long userId, Role role, ProfileRequestDto requestDto) {
         log.info("Create profile request received | userId={} | role={}", userId, role);
@@ -58,7 +72,11 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileResponseDto(savedProfile);
     }
 
-    // [Disha Gujar] : Retrieves the authenticated user's profile, auto-creating a blank one if missing.
+    /**
+ * Retrieves the authenticated user's profile, auto-creating a blank one if missing.
+ *
+ * @author Disha Gujar
+ */
     @Override
     public ProfileResponseDto getProfileByUserId(AuthenticatedUser user) {
         Long userId = user.getUserId();
@@ -79,6 +97,11 @@ public class ProfileServiceImpl implements ProfileService {
         log.info("Profile fetched successfully | userId={} | profileId={}", userId, profile.getId());
         return profileMapper.toProfileResponseDto(profile);
     }
+    /**
+     * Retrieves profile by user id internal.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public ProfileResponseDto getProfileByUserIdInternal(Long userId) {
@@ -100,7 +123,11 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileResponseDto(profile);
     }
 
-    // [Disha Gujar] : Updates existing profile details for the authenticated user.
+    /**
+ * Updates existing profile details for the authenticated user.
+ *
+ * @author Disha Gujar
+ */
     @Override
     public ProfileResponseDto updateProfile(AuthenticatedUser user, ProfileRequestDto requestDto) {
         Long userId = user.getUserId();
@@ -125,6 +152,11 @@ public class ProfileServiceImpl implements ProfileService {
         log.info("Profile updated successfully | userId={} | profileId={}", userId, updatedProfile.getId());
         return profileMapper.toProfileResponseDto(updatedProfile);
     }
+    /**
+     * Retrieves candidate profile preview by user id.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public CandidateProfilePreviewDto getCandidateProfilePreviewByUserId(Long userId) {
@@ -145,9 +177,70 @@ public class ProfileServiceImpl implements ProfileService {
         return preview;
     }
 
-    // [Disha Gujar] : RESUME MANAGEMENT SECTION — Handles file upload and secure download logic.
+    /**
+     * Returns a comprehensive candidate profile to a recruiter, after verifying
+     * job ownership and that the candidate has applied to that job.
+     *
+     * @author Disha Gujar
+     */
+    @Override
+    @CircuitBreaker(name = "jobService", fallbackMethod = "fullProfileFallback")
+    @Retry(name = "jobService")
+    public com.hireconnect.profileservice.dto.response.CandidateFullProfileDto getCandidateFullProfile(
+            AuthenticatedUser recruiter, Long candidateId, Long jobId) {
 
-    // [Disha Gujar] : Handles PDF resume uploads and associates them with the user's profile.
+        log.info("Recruiter full profile request | recruiterId={} | candidateId={} | jobId={}",
+                recruiter.getUserId(), candidateId, jobId);
+
+        if (!"RECRUITER".equalsIgnoreCase(recruiter.getRole().name())) {
+            log.warn("Unauthorized access attempt | userId={} | role={}", recruiter.getUserId(), recruiter.getRole());
+            throw new RuntimeException("Unauthorized");
+        }
+
+        Boolean ownsJob = jobServiceClient.isJobOwnedByRecruiter(jobId, recruiter.getUserId());
+        if (Boolean.FALSE.equals(ownsJob)) {
+            log.warn("Recruiter does not own job | recruiterId={} | jobId={}", recruiter.getUserId(), jobId);
+            throw new RuntimeException("You do not own this job");
+        }
+
+        Boolean hasApplied = applicationServiceClient.hasCandidateAppliedToJob(candidateId, jobId);
+        if (Boolean.FALSE.equals(hasApplied)) {
+            log.warn("Candidate did not apply | candidateId={} | jobId={}", candidateId, jobId);
+            throw new RuntimeException("Candidate did not apply to this job");
+        }
+
+        Profile profile = profileRepository.findByUserId(candidateId)
+                .orElseThrow(() -> {
+                    log.error("Candidate profile not found | candidateId={}", candidateId);
+                    return new RuntimeException("Candidate profile not found");
+                });
+
+        log.info("Full profile access granted | recruiterId={} | candidateId={}", recruiter.getUserId(), candidateId);
+        return profileMapper.toCandidateFullProfileDto(profile);
+    }
+
+    /**
+     * Fallback for getCandidateFullProfile when downstream services are unavailable.
+     */
+    public com.hireconnect.profileservice.dto.response.CandidateFullProfileDto fullProfileFallback(
+            AuthenticatedUser recruiter, Long candidateId, Long jobId, Exception e) {
+        log.error("Job/Application Service unavailable for full profile | fallback triggered | error={}", e.getMessage());
+        throw new RuntimeException("Service temporarily unavailable. Please try again later.");
+    }
+
+
+
+    /**
+ * RESUME MANAGEMENT SECTION — Handles file upload and secure download logic.
+ *
+ * @author Disha Gujar
+ */
+
+    /**
+ * Handles PDF resume uploads and associates them with the user's profile.
+ *
+ * @author Disha Gujar
+ */
     @Override
     public String uploadResume(AuthenticatedUser user, MultipartFile file) {
         log.info("Resume upload request | userId={}", user.getUserId());
@@ -186,6 +279,11 @@ public class ProfileServiceImpl implements ProfileService {
             throw new RuntimeException("Failed to upload resume: " + e.getMessage(), e);
         }
     }
+    /**
+     * Retrieves my resume.
+     *
+     * @author Disha Gujar
+     */
 
     @Override
     public Resume getMyResume(AuthenticatedUser user) {
@@ -200,8 +298,14 @@ public class ProfileServiceImpl implements ProfileService {
                 });
     }
 
-    // [Disha Gujar] : Allows recruiters to download candidate resumes for jobs they own.
+    /**
+ * Allows recruiters to download candidate resumes for jobs they own.
+ *
+ * @author Disha Gujar
+ */
     @Override
+    @CircuitBreaker(name = "jobService", fallbackMethod = "jobServiceFallback")
+    @Retry(name = "jobService")
     public Resume getResumeForRecruiter(AuthenticatedUser user, Long candidateId, Long jobId) {
         log.info("Recruiter resume access request | recruiterId={} | candidateId={} | jobId={}",
                 user.getUserId(), candidateId, jobId);
@@ -238,10 +342,27 @@ public class ProfileServiceImpl implements ProfileService {
                 });
     }
 
-    // [Disha Gujar] : HELPER METHODS SECTION — Internal utility logic for service operations.
+    /**
+     * Fallback for Job Service failure.
+     * Denies access for security reasons when the service is down.
+     */
+    public Resume jobServiceFallback(AuthenticatedUser user, Long candidateId, Long jobId, Exception e) {
+        log.error("Job/Application Service unavailable | fallback triggered | error={}", e.getMessage());
+        throw new RuntimeException("Service temporarily unavailable. Please try again later.");
+    }
+
+    /**
+ * HELPER METHODS SECTION — Internal utility logic for service operations.
+ *
+ * @author Disha Gujar
+ */
 
     private Profile getProfileByUser(AuthenticatedUser user) {
-        // [Disha Gujar] : Auto-creates a blank profile if none exists for the user.
+        /**
+ * Auto-creates a blank profile if none exists for the user.
+ *
+ * @author Disha Gujar
+ */
         return profileRepository.findByUserId(user.getUserId())
                 .orElseGet(() -> {
                     log.info("No profile found for userId={} \u2014 auto-creating during resume upload", user.getUserId());

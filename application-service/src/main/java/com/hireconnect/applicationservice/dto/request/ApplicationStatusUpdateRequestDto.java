@@ -5,6 +5,11 @@ import com.hireconnect.applicationservice.enums.ApplicationStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing ApplicationStatusUpdateRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

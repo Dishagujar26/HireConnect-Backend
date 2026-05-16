@@ -4,6 +4,11 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.*;
+/**
+ * Domain entity or core component representing RefreshToken.
+ *
+ * @author Disha Gujar
+ */
 
 @Entity
 @Table(name = "refresh_tokens")

@@ -15,6 +15,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+/**
+ * Domain entity or core component representing GatewayJwtAuthenticationFilter.
+ *
+ * @author Disha Gujar
+ */
 
 @RequiredArgsConstructor
 @Slf4j
@@ -52,7 +57,8 @@ public class GatewayJwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Unauthorized request to {} {} - missing or invalid Authorization header", method, requestPath);
+            log.warn("Unauthorized request to {} {} - missing or invalid Authorization header. Token present: {}", 
+                    method, requestPath, authHeader != null);
             writeUnauthorized(response, "Missing or invalid Authorization header");
             return;
         }
@@ -61,7 +67,8 @@ public class GatewayJwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             if (!jwtService.isTokenValid(token)) {
-                log.warn("Unauthorized request to {} {} - token is invalid or expired", method, requestPath);
+                log.warn("Unauthorized request to {} {} - token is invalid or expired for token starting with: {}", 
+                        method, requestPath, token.substring(0, Math.min(token.length(), 10)));
                 writeUnauthorized(response, "Invalid or expired token");
                 return;
             }
@@ -99,6 +106,10 @@ public class GatewayJwtAuthenticationFilter extends OncePerRequestFilter {
 
     private void writeUnauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:4200");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         response.setContentType("application/json");
         response.getWriter().write("{\"message\":\"" + message + "\"}");
     }

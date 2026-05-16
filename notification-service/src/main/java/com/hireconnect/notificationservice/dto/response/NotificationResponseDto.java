@@ -7,6 +7,11 @@ import com.hireconnect.notificationservice.enums.NotificationType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+/**
+ * Data transfer object representing NotificationResponse data.
+ *
+ * @author Disha Gujar
+ */
 
 @Getter
 @Setter

@@ -35,6 +35,11 @@ public class FeignClientConfig {
 	private static final String USER_ID_HEADER = "X-Auth-User-Id";
 	private static final String EMAIL_HEADER = "X-Auth-User-Email";
 	private static final String ROLE_HEADER = "X-Auth-User-Role";
+    /**
+     * Request interceptor.
+     *
+     * @author Disha Gujar
+     */
 
 	@Bean
 	public RequestInterceptor requestInterceptor() {

@@ -12,8 +12,18 @@ import com.hireconnect.jobservice.entity.JobStatus;
 import com.hireconnect.jobservice.entity.JobType;
 
 import jakarta.persistence.criteria.Predicate;
+/**
+ * Domain entity or core component representing JobSpecification.
+ *
+ * @author Disha Gujar
+ */
 
 public class JobSpecification {
+    /**
+     * Filter open jobs.
+     *
+     * @author Disha Gujar
+     */
 
     public static Specification<Job> filterOpenJobs(
             String keyword,

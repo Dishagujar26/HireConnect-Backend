@@ -11,6 +11,11 @@ import com.hireconnect.notificationservice.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Kafka Consumer for notification events.
+ * Listens to the notification topic and triggers notification creation and email dispatch.
+ * @author Disha Gujar
+ */
 @Component
 @RequiredArgsConstructor
 public class NotificationEventConsumer {
@@ -19,11 +24,24 @@ public class NotificationEventConsumer {
 
     private final NotificationService notificationService;
 
+    /**
+     * Consumes a NotificationEvent from Kafka.
+     * Maps the event to a request DTO and calls the NotificationService to process it.
+     * 
+     * @param event the notification event received from Kafka
+     
+ * @author Disha Gujar
+ */
     @KafkaListener(
             topics = "${app.kafka.notification-topic}",
             groupId = "notification-service-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
+    /**
+     * Consume notification event.
+     *
+     * @author Disha Gujar
+     */
     public void consumeNotificationEvent(NotificationEvent event) {
         logger.info(
                 "Received notification event for recipientUserId={}, type={}, sendEmail={}",

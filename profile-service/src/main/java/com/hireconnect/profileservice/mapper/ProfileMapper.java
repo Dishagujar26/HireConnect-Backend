@@ -26,9 +26,19 @@ import com.hireconnect.profileservice.entity.Resume;
 import com.hireconnect.profileservice.entity.Role;
 import com.hireconnect.profileservice.entity.Skill;
 import com.hireconnect.profileservice.entity.SocialLink;
+/**
+ * Domain entity or core component representing ProfileMapper.
+ *
+ * @author Disha Gujar
+ */
 
 @Component
 public class ProfileMapper {
+    /**
+     * To profile entity.
+     *
+     * @author Disha Gujar
+     */
 
     public Profile toProfileEntity(ProfileRequestDto requestDto, Long userId, Role role) {
         if (requestDto == null) {
@@ -45,6 +55,14 @@ public class ProfileMapper {
                 .location(requestDto.getLocation())
                 .about(requestDto.getAbout())
                 .profilePictureUrl(requestDto.getProfilePictureUrl())
+                .dateOfBirth(requestDto.getDateOfBirth())
+                .gender(requestDto.getGender())
+                .nationality(requestDto.getNationality())
+                .noticePeriodDays(requestDto.getNoticePeriodDays())
+                .expectedSalary(requestDto.getExpectedSalary())
+                .currentSalary(requestDto.getCurrentSalary())
+                .preferredWorkMode(requestDto.getPreferredWorkMode())
+                .totalExperienceYears(requestDto.getTotalExperienceYears())
                 .build();
 
         profile.setSkills(toSkillEntities(requestDto.getSkills(), profile));
@@ -55,6 +73,11 @@ public class ProfileMapper {
 
         return profile;
     }
+    /**
+     * Updates profile entity.
+     *
+     * @author Disha Gujar
+     */
 
     public void updateProfileEntity(Profile existingProfile, ProfileRequestDto requestDto) {
         existingProfile.setFirstName(requestDto.getFirstName());
@@ -64,6 +87,14 @@ public class ProfileMapper {
         existingProfile.setLocation(requestDto.getLocation());
         existingProfile.setAbout(requestDto.getAbout());
         existingProfile.setProfilePictureUrl(requestDto.getProfilePictureUrl());
+        existingProfile.setDateOfBirth(requestDto.getDateOfBirth());
+        existingProfile.setGender(requestDto.getGender());
+        existingProfile.setNationality(requestDto.getNationality());
+        existingProfile.setNoticePeriodDays(requestDto.getNoticePeriodDays());
+        existingProfile.setExpectedSalary(requestDto.getExpectedSalary());
+        existingProfile.setCurrentSalary(requestDto.getCurrentSalary());
+        existingProfile.setPreferredWorkMode(requestDto.getPreferredWorkMode());
+        existingProfile.setTotalExperienceYears(requestDto.getTotalExperienceYears());
 
         if (existingProfile.getSkills() == null) {
             existingProfile.setSkills(new ArrayList<>());
@@ -99,9 +130,20 @@ public class ProfileMapper {
                 existingProfile.getRecruiterDetail().setWebsite(requestDto.getRecruiterDetail().getWebsite());
                 existingProfile.getRecruiterDetail().setCompanyDescription(requestDto.getRecruiterDetail().getCompanyDescription());
                 existingProfile.getRecruiterDetail().setDesignation(requestDto.getRecruiterDetail().getDesignation());
+                existingProfile.getRecruiterDetail().setIndustry(requestDto.getRecruiterDetail().getIndustry());
+                existingProfile.getRecruiterDetail().setCompanySize(requestDto.getRecruiterDetail().getCompanySize());
+                existingProfile.getRecruiterDetail().setCompanyLogoUrl(requestDto.getRecruiterDetail().getCompanyLogoUrl());
+                existingProfile.getRecruiterDetail().setCompanyLinkedinUrl(requestDto.getRecruiterDetail().getCompanyLinkedinUrl());
+                existingProfile.getRecruiterDetail().setHiringFor(requestDto.getRecruiterDetail().getHiringFor());
+                existingProfile.getRecruiterDetail().setYearsInRecruiting(requestDto.getRecruiterDetail().getYearsInRecruiting());
             }
         }
     }
+    /**
+     * To profile response dto.
+     *
+     * @author Disha Gujar
+     */
 
     public ProfileResponseDto toProfileResponseDto(Profile profile) {
         if (profile == null) {
@@ -119,6 +161,14 @@ public class ProfileMapper {
                 .location(profile.getLocation())
                 .about(profile.getAbout())
                 .profilePictureUrl(profile.getProfilePictureUrl())
+                .dateOfBirth(profile.getDateOfBirth())
+                .gender(profile.getGender())
+                .nationality(profile.getNationality())
+                .noticePeriodDays(profile.getNoticePeriodDays())
+                .expectedSalary(profile.getExpectedSalary())
+                .currentSalary(profile.getCurrentSalary())
+                .preferredWorkMode(profile.getPreferredWorkMode())
+                .totalExperienceYears(profile.getTotalExperienceYears())
                 .createdAt(profile.getCreatedAt())
                 .updatedAt(profile.getUpdatedAt())
                 .skills(toSkillResponseDtos(profile.getSkills()))
@@ -127,6 +177,43 @@ public class ProfileMapper {
                 .socialLinks(toSocialLinkResponseDtos(profile.getSocialLinks()))
                 .resume(toResumeResponseDto(profile.getResume()))
                 .recruiterDetail(toRecruiterDetailResponseDto(profile.getRecruiterDetail()))
+                .build();
+    }
+
+    /**
+     * Maps Profile entity to CandidateFullProfileDto for recruiter full-profile view.
+     *
+     * @author Disha Gujar
+     */
+    public com.hireconnect.profileservice.dto.response.CandidateFullProfileDto toCandidateFullProfileDto(Profile profile) {
+        if (profile == null) {
+            return null;
+        }
+
+        return com.hireconnect.profileservice.dto.response.CandidateFullProfileDto.builder()
+                .userId(profile.getUserId())
+                .firstName(profile.getFirstName())
+                .lastName(profile.getLastName())
+                .headline(profile.getHeadline())
+                .location(profile.getLocation())
+                .about(profile.getAbout())
+                .profilePictureUrl(profile.getProfilePictureUrl())
+                .phone(profile.getPhone())
+                .dateOfBirth(profile.getDateOfBirth())
+                .gender(profile.getGender())
+                .nationality(profile.getNationality())
+                .noticePeriodDays(profile.getNoticePeriodDays())
+                .expectedSalary(profile.getExpectedSalary())
+                .currentSalary(profile.getCurrentSalary())
+                .preferredWorkMode(profile.getPreferredWorkMode())
+                .totalExperienceYears(profile.getTotalExperienceYears())
+                .skills(toSkillResponseDtos(profile.getSkills()))
+                .experiences(toExperienceResponseDtos(profile.getExperiences()))
+                .educations(toEducationResponseDtos(profile.getEducations()))
+                .socialLinks(toSocialLinkResponseDtos(profile.getSocialLinks()))
+                .resume(toResumeResponseDto(profile.getResume()))
+                .createdAt(profile.getCreatedAt())
+                .updatedAt(profile.getUpdatedAt())
                 .build();
     }
 
@@ -162,6 +249,7 @@ public class ProfileMapper {
                     .endDate(dto.getEndDate())
                     .grade(dto.getGrade())
                     .description(dto.getDescription())
+                    .currentlyStudying(dto.getCurrentlyStudying())
                     .profile(profile)
                     .build();
             educations.add(education);
@@ -185,6 +273,7 @@ public class ProfileMapper {
                     .endDate(dto.getEndDate())
                     .currentlyWorking(dto.getCurrentlyWorking())
                     .description(dto.getDescription())
+                    .industry(dto.getIndustry())
                     .profile(profile)
                     .build();
             experiences.add(experience);
@@ -219,6 +308,12 @@ public class ProfileMapper {
                 .website(dto.getWebsite())
                 .companyDescription(dto.getCompanyDescription())
                 .designation(dto.getDesignation())
+                .industry(dto.getIndustry())
+                .companySize(dto.getCompanySize())
+                .companyLogoUrl(dto.getCompanyLogoUrl())
+                .companyLinkedinUrl(dto.getCompanyLinkedinUrl())
+                .hiringFor(dto.getHiringFor())
+                .yearsInRecruiting(dto.getYearsInRecruiting())
                 .profile(profile)
                 .build();
     }
@@ -256,6 +351,7 @@ public class ProfileMapper {
                     .endDate(education.getEndDate())
                     .grade(education.getGrade())
                     .description(education.getDescription())
+                    .currentlyStudying(education.getCurrentlyStudying())
                     .build();
             responseDtos.add(dto);
         }
@@ -279,6 +375,7 @@ public class ProfileMapper {
                     .endDate(experience.getEndDate())
                     .currentlyWorking(experience.getCurrentlyWorking())
                     .description(experience.getDescription())
+                    .industry(experience.getIndustry())
                     .build();
             responseDtos.add(dto);
         }
@@ -327,6 +424,12 @@ public class ProfileMapper {
                 .website(recruiterDetail.getWebsite())
                 .companyDescription(recruiterDetail.getCompanyDescription())
                 .designation(recruiterDetail.getDesignation())
+                .industry(recruiterDetail.getIndustry())
+                .companySize(recruiterDetail.getCompanySize())
+                .companyLogoUrl(recruiterDetail.getCompanyLogoUrl())
+                .companyLinkedinUrl(recruiterDetail.getCompanyLinkedinUrl())
+                .hiringFor(recruiterDetail.getHiringFor())
+                .yearsInRecruiting(recruiterDetail.getYearsInRecruiting())
                 .build();
     }
 }

@@ -4,6 +4,11 @@ import com.hireconnect.auth.entity.NotificationType;
 
 import lombok.Builder;
 import lombok.Data;
+/**
+ * Data transfer object representing NotificationCreateRequest data.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @Builder

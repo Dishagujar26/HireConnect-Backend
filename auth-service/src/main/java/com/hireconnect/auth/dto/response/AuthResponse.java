@@ -4,6 +4,11 @@ import com.hireconnect.auth.entity.Role;
 
 import lombok.Builder;
 import lombok.Data;
+/**
+ * Payload object for AuthResponse.
+ *
+ * @author Disha Gujar
+ */
 
 @Data
 @Builder
