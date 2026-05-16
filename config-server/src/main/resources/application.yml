@@ -1,0 +1,44 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+
+  profiles:
+    active: native
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///D:/HireConnect-Workspace/config-repo-files/
+      # Disables the config CLIENT inside the config-server itself
+      # Prevents the server from calling itself on startup (infinite loop)
+      enabled: false
+
+  # Empty import prevents the server from trying to import its own config on bootstrap
+  config:
+    import: ""
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.boot.context.config: DEBUG
+  file:
+    path: ../logs/config-server
