@@ -94,7 +94,19 @@ public class SecurityConfig {
         log.info("Configuring CORS for API Gateway");
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        
+        // Read allowed origins dynamically from environment variable or default to localhost:4200
+        String allowedOriginsEnv = System.getenv("ALLOWED_ORIGINS");
+        List<String> allowedOrigins;
+        if (allowedOriginsEnv != null && !allowedOriginsEnv.trim().isEmpty()) {
+            allowedOrigins = List.of(allowedOriginsEnv.split(","));
+            log.info("CORS configured with dynamic allowed origins: {}", allowedOrigins);
+        } else {
+            allowedOrigins = List.of("http://localhost:4200");
+            log.info("CORS configured with default allowed origin: http://localhost:4200");
+        }
+
+        configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -102,7 +114,6 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
-        log.info("CORS configured with allowed origin: http://localhost:4200");
         return source;
     }
 }
