@@ -85,7 +85,7 @@ services:
     ports:
       - "8761:8761"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
       - EUREKA_CLIENT_FETCH_REGISTRY=false
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
@@ -101,7 +101,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -134,7 +134,7 @@ services:
     ports:
       - "8082:8082"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_profile_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -154,7 +154,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_job_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -174,7 +174,7 @@ services:
     ports:
       - "8084:8084"
     environment:
-      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_application_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -194,7 +194,7 @@ services:
     ports:
       - "8085:8085"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_interview_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -214,7 +214,7 @@ services:
     ports:
       - "8086:8086"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_notification_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -238,7 +238,7 @@ services:
     ports:
       - "8087:8087"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hireconnect_payment_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - DB_USERNAME=root
       - DB_PASSWORD=root
@@ -288,7 +288,7 @@ services:
     ports:
       - "8089:8089"
     environment:
-      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=optional:configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-registry:8761/eureka/
     depends_on:
       - config-server
@@ -303,7 +303,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - JAVA_TOOL_OPTIONS=-Dspring.config.import=configserver:http://config-server:8888
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://service-registry:8761/eureka/
       - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
       - SPRING_DATA_REDIS_HOST=redis
