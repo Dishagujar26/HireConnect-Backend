@@ -334,6 +334,17 @@ services:
     networks:
       - hireconnect-net
 
+  frontend:
+    build:
+      context: https://github.com/Dishagujar26/HireConnect-Frontend.git#main
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - hireconnect-net
+
 networks:
   hireconnect-net:
     driver: bridge
